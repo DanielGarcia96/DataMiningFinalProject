@@ -44,29 +44,29 @@ below = df.loc[df['greater-than-50k'] == '<=50K'].shape[0]
 information = -((above / df.shape[0]) * math.log(above / df.shape[0], 2)) - \
                               ((below / df.shape[0]) * math.log(below / df.shape[0], 2))
 
-def information_gain_selector(total_attributes, select_attributes):
+def information_gain_selector(attributes, tuples):
     # calculate information gain
-    info_d = dict(zip(select_attributes, np.zeros(len(select_attributes)))) 
+    info_d = dict(zip(attributes, np.zeros(len(attributes)))) 
 
     for i in info_d.keys():
         tmp = 0.0
 
         # Do a simple binary split
         if i in split_points:
-            above_split = df.loc[df[i] >  split_points[i]]
-            below_split = df.loc[df[i] <= split_points[i]]
+            above_split = tuples.loc[tuples[i] >  split_points[i]]
+            below_split = tuples.loc[tuples[i] <= split_points[i]]
 
             p_above = above_split.loc[above_split.['greater-than-50k'] == '>50K']
             n_above = above_split.loc[above_split.['greater-than-50k'] == '<=50K']
             p_below = below_split.loc[below_split.['greater-than-50k'] == '>50K']
             n_below = below_split.loc[below_split.['greater-than-50k'] == '<=50K']
 
-            tmp =   ((above_split.shape[0] / df.shape[0]) *             \
+            tmp =   ((above_split.shape[0] / tuples.shape[0]) *             \
                     ((-(p_above.shape[0] / above_split.shape[0]) *      \
                     log(p_above.shape[0] / above_split.shape[0], 2)) -  \
                     (n_above.shape[0] / above_split.shape[0]) *         \
                     log(n_above.shape[0] / above_split.shape[0], 2))) + \
-                    ((below_split.shape[0] / df.shape[0]) *             \
+                    ((below_split.shape[0] / tuples.shape[0]) *             \
                     ((-(p_below.shape[0] / below_split.shape[0]) *      \
                     log(p_below.shape[0] / below_split.shape[0], 2)) -  \
                     (n_below.shape[0] / below_split.shape[0]) *         \
@@ -79,12 +79,12 @@ def information_gain_selector(total_attributes, select_attributes):
         else:
             tmp = 0.0
             for k in i.unique():
-                sp = df.loc[df[i] == k]
+                sp = tuples.loc[tuples[i] == k]
 
                 p = sp.loc[sp.['greater-than-50k'] == '>50K']
                 n = sp.loc[sp.['greater-than-50k'] == '<=50K']
 
-                tmp +=  ((sp.shape[0] / df.shape[0]) *       \
+                tmp +=  ((sp.shape[0] / tuples.shape[0]) *       \
                         ((-(p.shape[0] / sp.shape[0]) *      \
                         log(p.shape[0] / sp.shape[0], 2)) -  \
                         (n.shape[0] / sp.shape[0]) *         \
