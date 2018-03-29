@@ -22,105 +22,150 @@ from sklearn.datasets import load_boston
 attribute_list = ["Age", "Workclass", "fnlwgt", "Education", "Education num",
                   "Marital Status", "Occupation", "Relationship", "Race", "Sex",
                   "Capital Gain", "capital Loss", "Hours Per Week", "Native Country", "Amount"]
+Age = []
+Workclass = []
+fnlwgt = []
+Education = []
+Education_num = []
+Marital_status = []
+Occupation = []
+Relationship = []
+Race = []
+Sex = []
+Capital_gain = []
+Capital_loss = []
+Hours = []
+Country = []
+
+attrs = []
+attrs.append(Age)
+attrs.append(Workclass)
+attrs.append(fnlwgt)
+attrs.append(Education)
+attrs.append(Education_num)
+attrs.append(Marital_status)
+attrs.append(Occupation)
+attrs.append(Relationship)
+attrs.append(Race)
+attrs.append(Sex)
+attrs.append(Capital_gain)
+attrs.append(Capital_loss)
+attrs.append(Hours)
+attrs.append(Country)
 
 data_df = pd.read_csv('adult_short.data', sep= ', ', header= None, engine= 'python')
 data_df.columns = attribute_list
 
-#for col in data:
-#    print(data[col][0])
-
-# Run false to put all on one line, run true for default
-#pd.set_option('expand_frame_repr', False)
-#pd.set_option('expand_frame_repr', True)
-
-#df = pd.DataFrame(data)
-#print(df)
-#print 1 row
-#print(data_df[0:1])
-
-#print(data_df)
-
-#print()
-#print(data[0:1])
-
-#print
-print("break\n\n")
-#print(data_df[0][0], data_df[1], data_df[5], data_df[6], data_df[8], data_df[9], data_df[12])
-"""
-print(data_df[0][0])
-print(data_df[1][0])
-print(data_df[3][0])
-print(data_df[5][0])
-print(data_df[6][0])
-print(data_df[8][0])
-print(data_df[9][0])
-print(data_df[12][0])
-"""
-
-print("here I")
-#print(data_df[0][0], data_df[1][0], data_df[3][0], data_df[5][0], data_df[6][0], \
-#      data_df[8][0], data_df[9][0], data_df[12][0])
-
-
-print("\n\n\n\n\n")
-#for value in data:
-#    print(value)
-#    print(data[value])
-#
-
-print("here II")
-#for i in range(0, 10):
-#    #print(i, " hi")
-#    print(data_df[0][i], data_df[1][i], data_df[3][i], data_df[5][i], data_df[6][i], \
-#      data_df[8][i], data_df[9][i], data_df[12][i], data_df[14][i])
-
-
 num_rows = len(data_df.index)
+num_cols = len(data_df.columns)
 
-
-print("here III")
-print(data_df)
-#data_df = data_df.sort_values(by=['Age'])
+#print("here III")
 #print(data_df)
+    
+def infoGain(data_df, attribute_list):
+    #print(data_df)
+    #print(attribute_list)
+    return
 
-#broken
-#print(data_df[0][0], data_df[1][0], data_df[3][0], data_df[5][0], data_df[6][0], \
-#      data_df[8][0], data_df[9][0], data_df[12][0])
+def checkInList(value, class_answer, class_label):
+    """
+    # list structure = [attribute, num_yes, num_no]
+    # so => list subscripts
+    # yes for list[1]
+    # no  for list[2]
+    
+    for handling missing data, I applied the class_answers to whichever
+    attribute had the most total sum
+    """
+    yes = 1
+    no = 2
+    inlst = 0
+    greater = 0 # >50K
+    less = 0 # <= 50K
+    
+    if value == "?":
+        #print(value, class_answer)
+        #print(class_label)
+        #print(len(class_label))
+        save_ndx = -1
+        maxTotal = 0
+        for ndx in range(0, len(class_label)):
+            if maxTotal < (class_label[ndx][1] + class_label[ndx][2]):
+                maxTotal = (class_label[ndx][1] + class_label[ndx][2])
+                save_ndx = ndx
+        if class_answer == ">50K":
+            class_label[save_ndx][yes] += 1
+        else:
+            class_label[save_ndx][no] += 1
+        
+        return
+    
+    for val in class_label: #check to see if this value is in the list, inc necessary value
+        if value == val[0]:
+            inlst = 1
+            if class_answer == ">50K":
+                val[yes] += 1
+            else:
+                val[no] += 1
+        
+            break
 
-"""
-print(data_df['Amount'][0])
-print(data_df['Amount'][1])
-print(data_df['Amount'][2])
-print(data_df['Amount'][8])
+    if inlst == 0: #if not in the list Age, add it
+        if class_answer == ">50K":
+            class_label.append([value, 1, 0])
+        else:
+            class_label.append([value, 0, 1])
 
-if data_df['Amount'][8] == ">50K":
-    print("TRUE")
-else:
-    print("FALSE")
-"""
+    return
 
-#for i in range(0, num_rows):
-#    print(i)
+def cntClass(data_df, attribute_list, attrs):
+    num_rows = len(data_df.index)
+    num_cols = len(data_df.columns)
 
-greater = 0 # >50K
-less = 0 # <= 50K
+    #print("-->")
+    #print(attrs)
+    #print(attrs[0])
+    #print("<--")
+    #print("IN cntClass\n")
+    for i in range(0, num_rows):
+        for j in range(0, num_cols-1): # -1 to avoid counting class: amount
+            #print( data_df[attribute_list[j]][i], " ", end="" )
+            #print(data_df[attribute_list[j]][i])
+            checkInList(data_df[attribute_list[j]][i],
+                        data_df['Amount'][i],
+                        attrs[j])
+            #print( data_df[attribute_list[j]][i], " ", end="" )
+            #print()
+            
+           
+        #print("|here X", data_df['Amount'][i])
+        #print() #\n
+        
+        #if i == 20:
+        #    break
+        
+    print("\n->out")
+    return
+
+
 for i in range(0, num_rows):
     if data_df['Amount'][i] == ">50K":
         greater += 1
     else:
         less += 1
-        
+       
 print(">50K =", greater, "<=50K =", less)
-
 print(entropy([less, greater]))
 
 
+#attrs[0].append([39, 0, 0])
 
+cntClass(data_df, attribute_list, attrs)
 
+print("\n--->DEBUG<-----\n")
 
-
-
-
-
-
+print("\nout")
+for tup in attrs:
+    print(tup)
+    #print()
 
