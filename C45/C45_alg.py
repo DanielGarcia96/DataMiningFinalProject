@@ -22,6 +22,7 @@ from sklearn.datasets import load_boston
 attribute_list = ["Age", "Workclass", "fnlwgt", "Education", "Education num",
                   "Marital Status", "Occupation", "Relationship", "Race", "Sex",
                   "Capital Gain", "capital Loss", "Hours Per Week", "Native Country", "Amount"]
+
 Age = []
 Workclass = []
 fnlwgt = []
@@ -53,6 +54,38 @@ attrs.append(Capital_loss)
 attrs.append(Hours)
 attrs.append(Country)
 
+info_data = []
+entropy_age = []
+entropy_workclass = []
+entropy_fnlwgt = []
+entropy_education = []
+entropy_education_num = []
+entropy_marital_status = []
+entropy_occupation = []
+entropy_relationship = []
+entropy_race = []
+entropy_sex = []
+entropy_capital_gain = []
+entropy_capital_loss = []
+entropy_hours = []
+entropy_country = []
+
+entropy_all = []
+entropy_all.append(entropy_age)
+entropy_all.append(entropy_workclass)
+entropy_all.append(entropy_fnlwgt)
+entropy_all.append(entropy_education)
+entropy_all.append(entropy_education_num)
+entropy_all.append(entropy_marital_status)
+entropy_all.append(entropy_occupation)
+entropy_all.append(entropy_relationship)
+entropy_all.append(entropy_race)
+entropy_all.append(entropy_sex)
+entropy_all.append(entropy_capital_gain)
+entropy_all.append(entropy_capital_loss)
+entropy_all.append(entropy_hours)
+entropy_all.append(entropy_country)
+
 data_df = pd.read_csv('adult_short.data', sep= ', ', header= None, engine= 'python')
 data_df.columns = attribute_list
 
@@ -62,11 +95,6 @@ num_cols = len(data_df.columns)
 #print("here III")
 #print(data_df)
     
-def infoGain(data_df, attribute_list):
-    #print(data_df)
-    #print(attribute_list)
-    return
-
 def checkInList(value, class_answer, class_label):
     """
     # list structure = [attribute, num_yes, num_no]
@@ -80,9 +108,7 @@ def checkInList(value, class_answer, class_label):
     yes = 1
     no = 2
     inlst = 0
-    greater = 0 # >50K
-    less = 0 # <= 50K
-    
+
     if value == "?":
         #print(value, class_answer)
         #print(class_label)
@@ -144,9 +170,93 @@ def cntClass(data_df, attribute_list, attrs):
         #if i == 20:
         #    break
         
-    print("\n->out")
+    #print("\n->out")
     return
 
+def calcEntropy(info_data, attribute):
+    print("CALCULATE ENTROPY")
+    print(info_data)
+    print(attribute)
+    print("I\n")
+    info_attribute = []
+    for value in attribute:
+        print("II")
+        print(value)
+        #print(value[0])
+        #print(value[1], value[2])
+        #print()
+        info_attribute.append([value[1], value[2]])
+    
+    print("\nIII")
+    print(info_attribute)
+    
+    #print("-> ", info_data)
+    #print("--> ", info_attribute)
+    print("IV")
+    info_ofdata = info(info_data)
+    #print(info_ofdata)
+    print("V")
+    info_ofattribute = info_a(info_data, info_attribute)
+    #print(info_ofattribute)
+    print("VI")
+    print(info_ofdata)
+    print(info_ofattribute)
+    infogain = gain(info_ofdata, info_ofattribute)
+    #print("---> ", infogain)
+    print("VII")
+    splitinfo_ofattribute = splitinfo_a(info_data, info_attribute)
+    #print("----> ",splitinfo_ofattribute)
+    print("VIII")
+    gainratio = gainRatio(infogain, splitinfo_ofattribute)
+    #print("-----> ", gainratio)
+    
+    print("OUT of entropy")
+    return infogain, gainratio
+
+def giveEntropy(info_data, entropy_all, attrs):
+    info_gain = 0
+    gain_ratio = 0
+    print("\nIN ENTROPY")
+    #print(info_data)
+    print(entropy_all)
+    #print(attrs)
+    print()
+    for attribute in attrs:
+        print(attribute)
+        print()
+    
+    #print(calcEntropy(info_data, attrs[13]))
+    print("--->|", attrs[13])
+    #ig, gr = calcEntropy(info_data, attrs[13])
+    gain = 0
+    gr = 0
+    print("\n\ntest\n")
+    print(info_data)
+    print(attrs[13])
+    gain, gr = calcEntropy(info_data, attrs[13])
+    return
+
+
+cntClass(data_df, attribute_list, attrs)
+#print("out")
+#print(attrs)
+#print("\n\n\n")
+#print(attrs[0])
+#print("-> ", attrs[0][0][1], attrs[0][0][2])
+#print("-> ", attrs[0][1][1], attrs[0][1][2])
+print()
+
+tst = []
+print(tst)
+tst.append([attrs[0][1], attrs[0][2]])
+print(tst)
+
+print("II\n")
+
+
+
+greater = 0 # >50K
+less = 0 # <= 50K    
 
 for i in range(0, num_rows):
     if data_df['Amount'][i] == ">50K":
@@ -155,17 +265,36 @@ for i in range(0, num_rows):
         less += 1
        
 print(">50K =", greater, "<=50K =", less)
-print(entropy([less, greater]))
+print(info([less, greater]))
+info_data.append(greater)
+info_data.append(less)
+print(info_data)
 
+print("entropy")
+gain, gr = calcEntropy(info_data, attrs[13])
+print("entropy => ", gain, gr)
 
 #attrs[0].append([39, 0, 0])
 
-cntClass(data_df, attribute_list, attrs)
 
 print("\n--->DEBUG<-----\n")
 
+print(info_data)
+print(entropy_all)
+#entropy_all[0].append([1, 2])
+entropy_age.append(1)
+entropy_age.append(2)
+print(entropy_all)
+print(entropy_age)
+
+print("GIVE")
+#giveEntropy(info_data, entropy_all, attrs)
+
 print("\nout")
-for tup in attrs:
-    print(tup)
+#for tup in attrs:
+    #print(tup)
     #print()
+    
+
+print("\n\n\n")
 
