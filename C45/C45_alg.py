@@ -173,44 +173,59 @@ def cntClass(data_df, attribute_list, attrs):
     #print("\n->out")
     return
 
+
+def gain2(info, info_a):
+    '''
+    return the information gain:
+    gain(D, A) = entropy(D)−􏰋 SUM ( |Di| / |D| * entropy(Di) )
+    '''
+    #print("IN gain FUNC")
+    #print("X| ", info)
+    #print("X| ", info_a)
+    
+    gain = info - info_a
+    return gain
+
 def calcEntropy(info_data, attribute):
-    print("CALCULATE ENTROPY")
-    print(info_data)
-    print(attribute)
-    print("I\n")
+    print("\nCALCULATE ENTROPY of ")
+    #print(info_data)
+    #print(attribute)
+    #print("I\n")
     info_attribute = []
+    #print("--------------->", info_attribute)
     for value in attribute:
-        print("II")
-        print(value)
+        #print("II")
+        #print(value)
         #print(value[0])
         #print(value[1], value[2])
         #print()
         info_attribute.append([value[1], value[2]])
     
-    print("\nIII")
-    print(info_attribute)
+    #print("\nIII")
+    #print("III ",info_attribute)
     
     #print("-> ", info_data)
     #print("--> ", info_attribute)
-    print("IV")
+    #print("IV")
     info_ofdata = info(info_data)
     #print(info_ofdata)
-    print("V")
+    #print("V")
     info_ofattribute = info_a(info_data, info_attribute)
     #print(info_ofattribute)
-    print("VI")
-    print(info_ofdata)
-    print(info_ofattribute)
-    infogain = gain(info_ofdata, info_ofattribute)
-    #print("---> ", infogain)
-    print("VII")
+    #print("VI")
+    print("info(d) = ", info_ofdata)
+    print("info_a(d) = ", info_ofattribute)
+    infogain = gain2(info_ofdata, info_ofattribute)
+    print("gain(a) = ", infogain)
+    #print("VII")
     splitinfo_ofattribute = splitinfo_a(info_data, info_attribute)
-    #print("----> ",splitinfo_ofattribute)
-    print("VIII")
+    print("splitinfo_a(d) = ",splitinfo_ofattribute)
+    #print("VIII")
     gainratio = gainRatio(infogain, splitinfo_ofattribute)
-    #print("-----> ", gainratio)
+    print("gainratio(a) = ", gainratio)
     
-    print("OUT of entropy")
+    #print("OUT of entropy")
+    print()
     return infogain, gainratio
 
 def giveEntropy(info_data, entropy_all, attrs):
@@ -221,19 +236,28 @@ def giveEntropy(info_data, entropy_all, attrs):
     print(entropy_all)
     #print(attrs)
     print()
+    i = 0
     for attribute in attrs:
-        print(attribute)
-        print()
+        #print("i = ", i)
+        #print(attribute)
+        #print("->", attribute[0])
+        #print(len(attribute))
+        info_gain, gain_ratio = calcEntropy(info_data, attribute)
+        entropy_all[i].append(format(info_gain, '.5f'))
+        entropy_all[i].append(format(gain_ratio, '.5f'))
+        #print()
+        i += 1
     
     #print(calcEntropy(info_data, attrs[13]))
-    print("--->|", attrs[13])
+    #print("--->|", attrs[13])
     #ig, gr = calcEntropy(info_data, attrs[13])
-    gain = 0
-    gr = 0
-    print("\n\ntest\n")
-    print(info_data)
-    print(attrs[13])
-    gain, gr = calcEntropy(info_data, attrs[13])
+    #gain = 0
+    #gr = 0
+    #print("\n\ntest\n")
+    #print(info_data)
+    #print(attrs[13])
+    #gain, gr = calcEntropy(info_data, attrs[13])
+    print(entropy_all)
     return
 
 
@@ -246,13 +270,14 @@ cntClass(data_df, attribute_list, attrs)
 #print("-> ", attrs[0][1][1], attrs[0][1][2])
 print()
 
+"""
 tst = []
 print(tst)
 tst.append([attrs[0][1], attrs[0][2]])
 print(tst)
 
 print("II\n")
-
+"""
 
 
 greater = 0 # >50K
@@ -270,15 +295,23 @@ info_data.append(greater)
 info_data.append(less)
 print(info_data)
 
-print("entropy")
-gain, gr = calcEntropy(info_data, attrs[13])
-print("entropy => ", gain, gr)
+#print("entropy")
+#gain, gr = calcEntropy(info_data, attrs[0])
+#print("entropy => ", gain, gr)
+#gain, gr = calcEntropy(info_data, attrs[1])
+#print("entropy => ", gain, gr)
 
 #attrs[0].append([39, 0, 0])
 
+print("GIVE")
+giveEntropy(info_data, entropy_all, attrs)
 
 print("\n--->DEBUG<-----\n")
 
+print(entropy_all)
+
+
+"""
 print(info_data)
 print(entropy_all)
 #entropy_all[0].append([1, 2])
@@ -286,15 +319,10 @@ entropy_age.append(1)
 entropy_age.append(2)
 print(entropy_all)
 print(entropy_age)
+"""
 
-print("GIVE")
-#giveEntropy(info_data, entropy_all, attrs)
 
-print("\nout")
+print("\nDone\n")
 #for tup in attrs:
     #print(tup)
     #print()
-    
-
-print("\n\n\n")
-
