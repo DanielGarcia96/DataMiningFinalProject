@@ -23,104 +23,306 @@ attribute_list = ["Age", "Workclass", "fnlwgt", "Education", "Education num",
                   "Marital Status", "Occupation", "Relationship", "Race", "Sex",
                   "Capital Gain", "capital Loss", "Hours Per Week", "Native Country", "Amount"]
 
+Age = []
+Workclass = []
+fnlwgt = []
+Education = []
+Education_num = []
+Marital_status = []
+Occupation = []
+Relationship = []
+Race = []
+Sex = []
+Capital_gain = []
+Capital_loss = []
+Hours = []
+Country = []
+
+attrs = []
+attrs.append(Age)
+attrs.append(Workclass)
+attrs.append(fnlwgt)
+attrs.append(Education)
+attrs.append(Education_num)
+attrs.append(Marital_status)
+attrs.append(Occupation)
+attrs.append(Relationship)
+attrs.append(Race)
+attrs.append(Sex)
+attrs.append(Capital_gain)
+attrs.append(Capital_loss)
+attrs.append(Hours)
+attrs.append(Country)
+
+info_data = []
+entropy_age = []
+entropy_workclass = []
+entropy_fnlwgt = []
+entropy_education = []
+entropy_education_num = []
+entropy_marital_status = []
+entropy_occupation = []
+entropy_relationship = []
+entropy_race = []
+entropy_sex = []
+entropy_capital_gain = []
+entropy_capital_loss = []
+entropy_hours = []
+entropy_country = []
+
+entropy_all = []
+entropy_all.append(entropy_age)
+entropy_all.append(entropy_workclass)
+entropy_all.append(entropy_fnlwgt)
+entropy_all.append(entropy_education)
+entropy_all.append(entropy_education_num)
+entropy_all.append(entropy_marital_status)
+entropy_all.append(entropy_occupation)
+entropy_all.append(entropy_relationship)
+entropy_all.append(entropy_race)
+entropy_all.append(entropy_sex)
+entropy_all.append(entropy_capital_gain)
+entropy_all.append(entropy_capital_loss)
+entropy_all.append(entropy_hours)
+entropy_all.append(entropy_country)
+
 data_df = pd.read_csv('adult_short.data', sep= ', ', header= None, engine= 'python')
 data_df.columns = attribute_list
 
-#for col in data:
-#    print(data[col][0])
-
-# Run false to put all on one line, run true for default
-#pd.set_option('expand_frame_repr', False)
-#pd.set_option('expand_frame_repr', True)
-
-#df = pd.DataFrame(data)
-#print(df)
-#print 1 row
-#print(data_df[0:1])
-
-#print(data_df)
-
-#print()
-#print(data[0:1])
-
-#print
-print("break\n\n")
-#print(data_df[0][0], data_df[1], data_df[5], data_df[6], data_df[8], data_df[9], data_df[12])
-"""
-print(data_df[0][0])
-print(data_df[1][0])
-print(data_df[3][0])
-print(data_df[5][0])
-print(data_df[6][0])
-print(data_df[8][0])
-print(data_df[9][0])
-print(data_df[12][0])
-"""
-
-print("here I")
-#print(data_df[0][0], data_df[1][0], data_df[3][0], data_df[5][0], data_df[6][0], \
-#      data_df[8][0], data_df[9][0], data_df[12][0])
-
-
-print("\n\n\n\n\n")
-#for value in data:
-#    print(value)
-#    print(data[value])
-#
-
-print("here II")
-#for i in range(0, 10):
-#    #print(i, " hi")
-#    print(data_df[0][i], data_df[1][i], data_df[3][i], data_df[5][i], data_df[6][i], \
-#      data_df[8][i], data_df[9][i], data_df[12][i], data_df[14][i])
-
-
 num_rows = len(data_df.index)
+num_cols = len(data_df.columns)
 
-
-print("here III")
-print(data_df)
-#data_df = data_df.sort_values(by=['Age'])
+#print("here III")
 #print(data_df)
+    
+def checkInList(value, class_answer, class_label):
+    """
+    # list structure = [attribute, num_yes, num_no]
+    # so => list subscripts
+    # yes for list[1]
+    # no  for list[2]
+    
+    for handling missing data, I applied the class_answers to whichever
+    attribute had the most total sum
+    """
+    yes = 1
+    no = 2
+    inlst = 0
 
-#broken
-#print(data_df[0][0], data_df[1][0], data_df[3][0], data_df[5][0], data_df[6][0], \
-#      data_df[8][0], data_df[9][0], data_df[12][0])
+    if value == "?":
+        #print(value, class_answer)
+        #print(class_label)
+        #print(len(class_label))
+        save_ndx = -1
+        maxTotal = 0
+        for ndx in range(0, len(class_label)):
+            if maxTotal < (class_label[ndx][1] + class_label[ndx][2]):
+                maxTotal = (class_label[ndx][1] + class_label[ndx][2])
+                save_ndx = ndx
+        if class_answer == ">50K":
+            class_label[save_ndx][yes] += 1
+        else:
+            class_label[save_ndx][no] += 1
+        
+        return
+    
+    for val in class_label: #check to see if this value is in the list, inc necessary value
+        if value == val[0]:
+            inlst = 1
+            if class_answer == ">50K":
+                val[yes] += 1
+            else:
+                val[no] += 1
+        
+            break
+
+    if inlst == 0: #if not in the list Age, add it
+        if class_answer == ">50K":
+            class_label.append([value, 1, 0])
+        else:
+            class_label.append([value, 0, 1])
+
+    return
+
+def cntClass(data_df, attribute_list, attrs):
+    num_rows = len(data_df.index)
+    num_cols = len(data_df.columns)
+
+    #print("-->")
+    #print(attrs)
+    #print(attrs[0])
+    #print("<--")
+    #print("IN cntClass\n")
+    for i in range(0, num_rows):
+        for j in range(0, num_cols-1): # -1 to avoid counting class: amount
+            #print( data_df[attribute_list[j]][i], " ", end="" )
+            #print(data_df[attribute_list[j]][i])
+            checkInList(data_df[attribute_list[j]][i],
+                        data_df['Amount'][i],
+                        attrs[j])
+            #print( data_df[attribute_list[j]][i], " ", end="" )
+            #print()
+            
+           
+        #print("|here X", data_df['Amount'][i])
+        #print() #\n
+        
+        #if i == 20:
+        #    break
+        
+    #print("\n->out")
+    return
+
+
+def gain2(info, info_a):
+    '''
+    return the information gain:
+    gain(D, A) = entropy(D)−􏰋 SUM ( |Di| / |D| * entropy(Di) )
+    '''
+    #print("IN gain FUNC")
+    #print("X| ", info)
+    #print("X| ", info_a)
+    
+    gain = info - info_a
+    return gain
+
+def calcEntropy(info_data, attribute):
+    print("\nCALCULATE ENTROPY of ")
+    #print(info_data)
+    #print(attribute)
+    #print("I\n")
+    info_attribute = []
+    #print("--------------->", info_attribute)
+    for value in attribute:
+        #print("II")
+        #print(value)
+        #print(value[0])
+        #print(value[1], value[2])
+        #print()
+        info_attribute.append([value[1], value[2]])
+    
+    #print("\nIII")
+    #print("III ",info_attribute)
+    
+    #print("-> ", info_data)
+    #print("--> ", info_attribute)
+    #print("IV")
+    info_ofdata = info(info_data)
+    #print(info_ofdata)
+    #print("V")
+    info_ofattribute = info_a(info_data, info_attribute)
+    #print(info_ofattribute)
+    #print("VI")
+    print("info(d) = ", info_ofdata)
+    print("info_a(d) = ", info_ofattribute)
+    infogain = gain2(info_ofdata, info_ofattribute)
+    print("gain(a) = ", infogain)
+    #print("VII")
+    splitinfo_ofattribute = splitinfo_a(info_data, info_attribute)
+    print("splitinfo_a(d) = ",splitinfo_ofattribute)
+    #print("VIII")
+    gainratio = gainRatio(infogain, splitinfo_ofattribute)
+    print("gainratio(a) = ", gainratio)
+    
+    #print("OUT of entropy")
+    print()
+    return infogain, gainratio
+
+def giveEntropy(info_data, entropy_all, attrs):
+    info_gain = 0
+    gain_ratio = 0
+    print("\nIN ENTROPY")
+    #print(info_data)
+    print(entropy_all)
+    #print(attrs)
+    print()
+    i = 0
+    for attribute in attrs:
+        #print("i = ", i)
+        #print(attribute)
+        #print("->", attribute[0])
+        #print(len(attribute))
+        info_gain, gain_ratio = calcEntropy(info_data, attribute)
+        entropy_all[i].append(format(info_gain, '.5f'))
+        entropy_all[i].append(format(gain_ratio, '.5f'))
+        #print()
+        i += 1
+    
+    #print(calcEntropy(info_data, attrs[13]))
+    #print("--->|", attrs[13])
+    #ig, gr = calcEntropy(info_data, attrs[13])
+    #gain = 0
+    #gr = 0
+    #print("\n\ntest\n")
+    #print(info_data)
+    #print(attrs[13])
+    #gain, gr = calcEntropy(info_data, attrs[13])
+    print(entropy_all)
+    return
+
+
+cntClass(data_df, attribute_list, attrs)
+#print("out")
+#print(attrs)
+#print("\n\n\n")
+#print(attrs[0])
+#print("-> ", attrs[0][0][1], attrs[0][0][2])
+#print("-> ", attrs[0][1][1], attrs[0][1][2])
+print()
 
 """
-print(data_df['Amount'][0])
-print(data_df['Amount'][1])
-print(data_df['Amount'][2])
-print(data_df['Amount'][8])
+tst = []
+print(tst)
+tst.append([attrs[0][1], attrs[0][2]])
+print(tst)
 
-if data_df['Amount'][8] == ">50K":
-    print("TRUE")
-else:
-    print("FALSE")
+print("II\n")
 """
 
-#for i in range(0, num_rows):
-#    print(i)
 
 greater = 0 # >50K
-less = 0 # <= 50K
+less = 0 # <= 50K    
+
 for i in range(0, num_rows):
     if data_df['Amount'][i] == ">50K":
         greater += 1
     else:
         less += 1
-        
+       
 print(">50K =", greater, "<=50K =", less)
+print(info([less, greater]))
+info_data.append(greater)
+info_data.append(less)
+print(info_data)
 
-print(entropy([less, greater]))
+#print("entropy")
+#gain, gr = calcEntropy(info_data, attrs[0])
+#print("entropy => ", gain, gr)
+#gain, gr = calcEntropy(info_data, attrs[1])
+#print("entropy => ", gain, gr)
+
+#attrs[0].append([39, 0, 0])
+
+print("GIVE")
+giveEntropy(info_data, entropy_all, attrs)
+
+print("\n--->DEBUG<-----\n")
+
+print(entropy_all)
 
 
+"""
+print(info_data)
+print(entropy_all)
+#entropy_all[0].append([1, 2])
+entropy_age.append(1)
+entropy_age.append(2)
+print(entropy_all)
+print(entropy_age)
+"""
 
 
-
-
-
-
-
-
-
+print("\nDone\n")
+#for tup in attrs:
+    #print(tup)
+    #print()
