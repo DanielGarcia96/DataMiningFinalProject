@@ -25,24 +25,57 @@
 
 import pdb
 import math
+import logging
 import pandas as pd
 
+logging.basicConfig(filename='tree.log', level=logging.DEBUG)
+
 class Tree(object):
-    def __init__(self, data, attributes = None, classes=(1, 2), majority = 0.9, numeric_cutoff = 100):
+    def __init__(self, data, classes=(1, 2), majority = 0.9, numeric_cutoff = 10):
         self.data = data                                # Tuples we are considering
         self.b_count = 0                                # Number of branches
-        self.attributes = attributes                    # Attributes we can test on
         self.branches = dict()                          # Branch paths arranged by dictionary
         self.majority = majority                        # Majority needed to be a class
         self.classes = classes                          # Tuple determining the classes 
         self.numeric_cutoff = numeric_cutoff            # Point at which number of unique values
-        self.identifier = None                          # Two value tuple, (class/test, value)
+        self.identifier = self.determine_identifier()   # Two value tuple, (class/test, value)
                                                         # indicates a numeric attribute
-    def initialize(self):
-        self.identifier = self.determine_identifier(self.attributes)
+    def __str__(self):
+        data_string = "Data:\n\t" + ' '.join(self.data) + "\n"
+        attribute_string = "Attributes:\n\t" + ' '.join(self.data.columns) + "\n"
+        branch_string = '\nBranches:\n'
+        for k in self.branches.keys():
+            branch_string += "\tKey: " + str(k) + "\n";
+        branch_string += "\n"
+
+        result_string = data_string + attribute_string + branch_string
+        result_string += "b_count: " + str(self.b_count) + "\n"
+        result_string += "majority: " + str(self.majority) + "\n"
+        result_string += "classes: " + ' '.join(self.classes) + "\n"
+        result_string += "numeric_cutoff: " + str(self.numeric_cutoff) + "\n"
+        result_string += "identifier: " + ', '.join(self.identifier) + "\n\n"
+        
+        return result_string
+
+    def __repr__(self):
+        data_string = "Data:\n\t" + ' '.join(self.data) + "\n"
+        attribute_string = "Attributes:\n\t" + ' '.join(self.data.columns) + "\n"
+        branch_string = '\nBranches:\n'
+        for k in self.branches.keys():
+            branch_string += "\tKey: " + str(k) + "\n";
+        branch_string += "\n"
+
+        result_string = data_string + attribute_string + branch_string
+        result_string += "b_count: " + str(self.b_count) + "\n"
+        result_string += "majority: " + str(self.majority) + "\n"
+        result_string += "classes: " + ' '.join(self.classes) + "\n"
+        result_string += "numeric_cutoff: " + str(self.numeric_cutoff) + "\n"
+        result_string += "identifier: " + ', '.join(self.identifier) + "\n\n"
+        
+        return result_string
 
     # Determine what kind of node this is
-    def determine_identifier(self, attributes=None):
+    def determine_identifier(self):
         # Check for a majority
         class_candidates = dict()
         for i in self.classes:
@@ -55,31 +88,35 @@ class Tree(object):
             return ("class", best)
 
 
+        logging.debug("Length of self.data.columns: " +
+                        '('+str(self.data.columns.shape[0])+')\n')
+
         # If we've run out of attributes to test on, basic majority wins
-        if(attributes.shape[0] == 0):
+        if(self.data.columns.shape[0] <= 1):
             return ("class", best)
 
         # Otherwise, this is a test node and the attribute to test on will be selected
         # by the attribute selector
-        return ("test", self.information_gain_selector(attributes, self.data, self.classes))
+        return ("test", self.information_gain_selector(self.data.columns, self.data, self.classes))
 
     def dump(self):
-        print("self.data:", end=" ")
-        print(self.data)
-        print("self.b_count: " + str(self.b_count))
-        print("self.attributes: " + self.attributes)
-        print("self.branches:", end=" ")
-        print(self.branches)
-        print("self.majority: " + str(self.majority))
-        print("self.identifier:", end=" ")
-        print(self.identifier)
-        print("self.classes: ", end=" ")
-        print(self.classes)
-        print("self.numeric_cutoff: " + str(self.numeric_cutoff) + "\n")
+        logging.debug("self.data:")
+        logging.debug(' '.join(self.data))
+        logging.debug("self.b_count: " + str(self.b_count))
+        logging.debug("self.attributes: " + ' '.join(self.data.columns))
+        logging.debug("self.branches:")
+        logging.debug(self.branches)
+        logging.debug("self.majority: " + str(self.majority))
+        logging.debug("self.identifier:")
+        logging.debug(self.identifier)
+        logging.debug("self.classes: ")
+        logging.debug(self.classes)
+        logging.debug("self.numeric_cutoff: " + str(self.numeric_cutoff) + "\n")
 
     def is_numeric(self, data, attr):
-        print("Testing: " + attr)
-        return data[attr].unique().shape[0] >= self.numeric_cutoff and is_number(data[attr][0])
+        logging.debug("Testing: " + attr)
+        logging.debug("Accessing value: " + str(data.iloc[0][attr]))
+        return data[attr].unique().shape[0] >= self.numeric_cutoff and is_number(data.iloc[0][attr])
 
     def information_gain_selector(self, attributes, data, classes):
         # calculate expected information to classify a tuple
@@ -137,14 +174,15 @@ class Tree(object):
 
             attribute_gain_dict[i] = expected_info - attribute_gain_dict[i]
 
-        #print(attribute_gain_dict)
+        logging.debug(attribute_gain_dict)
 
         # return the greatest information gain
         m = max(attribute_gain_dict, key=attribute_gain_dict.get)
-        print("Returning: " + m)
+        logging.debug("Returning: " + m)
         return m
 
     def print_tree(self, depth=0):
+        logging.debug("Iterating")
         if self.identifier[0] == "class":
             print("\t" * depth, end=" ")
             print(self.identifier)
@@ -156,6 +194,7 @@ class Tree(object):
 
     # Train the tree
     def fit(self):
+        #pdb.set_trace()
         # If this is a class, it's a terminating condition
         if self.identifier[0] == "class":
             return
@@ -163,29 +202,35 @@ class Tree(object):
         else:
             # Check for a numeric test
             if self.is_numeric(self.data, self.identifier[1]):
+                # Create a branch for all values below the median
                 self.branches['below'] =  Tree (
-                    self.data.loc[self.data[self.identifier[1]] <= self.data[self.identifier[1]].median()],
-                    attributes = df.columns.drop([self.identifier[1]]),
+                    self.data.loc[self.data[self.identifier[1]] <=
+                        self.data[self.identifier[1]].median()]
+                        .drop(self.identifier[1], axis=1),
                     classes=self.classes
                 )
-                self.branches['below'].initialize()
-                self.branches['below'].fit()
+                self.b_count += 1
+
+                # Create a branch for all values above the median
                 self.branches['above'] = Tree (
-                    self.data.loc[self.data[self.identifier[1]] > self.data[self.identifier[1]].median()],
-                    attributes = df.columns.drop([self.identifier[1]]),
+                    self.data.loc[self.data[self.identifier[1]] >
+                        self.data[self.identifier[1]].median()].
+                        drop(self.identifier[1], axis=1),
                     classes=self.classes
                 )
-                self.branches['above'].initialize()
+                self.b_count += 1
+
                 self.branches['above'].fit()
+                self.branches['below'].fit()
             # Must be non-numeric test
             else:
                 for i in self.data[self.identifier[1]].unique():
                     self.branches[i] = Tree (
-                        self.data.loc[self.data[self.identifier[1]] == i],
-                        attributes=df.columns.drop([self.identifier[1]]),
+                        self.data.loc[self.data[self.identifier[1]] == i].
+                            drop(self.identifier[1], axis=1),
                         classes=self.classes
                     )
-                    self.branches[i].initialize()
+                    self.b_count += 1
                     self.branches[i].fit()
             
 
@@ -205,8 +250,7 @@ class Tree(object):
 
 # Helper function to determine if parameter is a number
 def is_number(s):
-    print("Checking :", end=' ')
-    print(s)
+    logging.debug("Checking :" + str(s))
     try:
         float(s)
         return True
@@ -221,8 +265,8 @@ def is_number(s):
 
 df = pd.read_csv('adult.data.csv', sep=',', header=0)
 
-t1 = Tree(df, attributes = df.columns, classes=("<=50K", ">50K"))
-t1.initialize()
+t1 = Tree(df, classes=("<=50K", ">50K"))
+t1.dump()
 t1.fit()
-t1.print_tree()
+#t1.print_tree()
 #t1.classify(df.values[0])
