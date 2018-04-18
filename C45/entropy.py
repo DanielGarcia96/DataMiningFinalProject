@@ -80,7 +80,7 @@ def gain(info, info_a):
 def gainRatio(gain, splitInfo):
     #print("--------------------------------->", gain, splitInfo)
     if gain == 0:
-        return 0
+        return(0)
     gainRatio = gain / splitInfo
     
     return gainRatio
@@ -309,9 +309,9 @@ def getThreshold(data, candidateSplitPoints, lengthUniqueValues):
             splitPoint = candidate
         
     
-    for pairs in test:
-        print(pairs)
-    print(lowestGain, splitPoint)
+    #for pairs in test:
+    #    print(pairs)
+    #print(lowestGain, splitPoint)
     
     return(splitPoint)
 
@@ -330,6 +330,8 @@ def calcEntropy(info_data, attribute):
     splitinfo_ofattribute = splitinfo_a(info_data, info_attribute)
     #print("splitinfo_a(d) = ",splitinfo_ofattribute)
     gainratio = gainRatio(infogain, splitinfo_ofattribute)
+    #if gainratio == 0:
+    #    sys.exit()
     #print("gainratio(a) = ", gainratio)
     
     #print()
@@ -345,6 +347,10 @@ def giveEntropy(info_data, attrAnswers):
     i = 0
     for attribute in attrAnswers:
         info_gain, gain_ratio = calcEntropy(info_data, attribute)
+        #if gain_ratio == 0:
+            #print(attribute)
+            #print(attrAnswers)
+            #sys.exit()
         #print("----------------->", info_gain, gain_ratio)
         filledEntropyList[i].append(format(info_gain, '.5f'))
         filledEntropyList[i].append(format(gain_ratio, '.5f'))

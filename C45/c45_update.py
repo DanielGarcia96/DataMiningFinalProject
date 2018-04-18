@@ -23,7 +23,7 @@ attributeList = ["Age", "Workclass", "fnlwgt", "Education", "Education_Num",
                   "Capital_Gain", "Capital_Loss", "Hours_Per_Week", "Native_Country", "Amount"]
 
 
-data_df = pd.read_csv('adult_small.data', sep= ', ', header= None, engine= 'python')
+data_df = pd.read_csv('adult_short.data', sep= ', ', header= None, engine= 'python')
 data_df.columns = attributeList
 
 listTuples = []
@@ -33,12 +33,8 @@ for index, row in data_df.iterrows():
     
 decisionTree = generateDecisionTree(listTuples, attributeList, exclusionList)
 
-
-
-
-
-
 print("\n\n------------------------------------------------------------\nDone")
 
-printTree(decisionTree)
+#printTree(decisionTree)
 
+print_tree(decisionTree)
