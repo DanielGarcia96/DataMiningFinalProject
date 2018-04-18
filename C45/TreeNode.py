@@ -118,7 +118,7 @@ def getSplitPoint(data, splittingAttr, index):
     
     
     """
-    print("\n")
+    print("\n") 
     for tup in tmpListValuesClasses:
         print(tup[splittingAttr])
         
@@ -130,8 +130,96 @@ def getSplitPoint(data, splittingAttr, index):
     
     return(splitPoint)
 
-def generate_decision_tree(data, attributeList, exclusionList):
+
+def distinctValues(data, splittingAttr):
+    
+    return
+
+def createBranches(data, splittingAttr):
+    branches = [ ["none",[]] ]
+    #branches = [ ["HS-grad", []], ["Some-college", []] ]
+    print("CREATING BRANCHES for discrete values")
+    
+    print(data)
+    for val in data:
+        print(val[splittingAttr])
+    print("\nlength = ", len(data), "splitting attribute =", splittingAttr)
+    print(branches)
+    #branches.append([data[0][splittingAttr], [data[0]]])
+    #branches.remove(branches[0])
+    #print(branches)
+    #print()
+    #for val in branches:
+    #    print(val)
+    
+    #print("---->")
+    #print(branches[0]) #index
+    #print(branches[0][0]) # attr name
+    #print(branches[0][1]) # list that contains stuff with that attr
+    
+    
+    #print("<----")
+
+    inList = 0
+    for tuples in data:
+        for i in range(0, len(branches)):
+            #print(branches[i])
+            if tuples[splittingAttr] == branches[i][0]:
+                #print("TRUE")
+                inList = 1
+                branches[i][1].append(tuples)
+                break
+        if inList == 0:
+            branches.append([tuples[splittingAttr], [tuples]])
+            #print("False")
+            
+        
+    branches.remove(branches[0])
+    
+    #print(branches)
+    #for val in branches:
+        #print(val[0])
+        #print(val[1])
+        #for tup in val[1]:
+        #    print(tup[splittingAttr])
+        #sys.exit()
+        #for obj in val:
+            #print(obj)
+        #print()
+        
+    print("_____________")
+    finalBranches = []
+    for val in branches:
+        finalBranches.append(val[1])
+        
+    #print(finalBranches)
+    #for branch in finalBranches:
+    #    print(branch)
+    #    print()
+    
+    print("LENGTH = ", len(finalBranches))
+    
+    #sys.exit()
+    
+    #
+    #for tuples in data:
+    #    print(tuples[splittingAttr])
+    #    if (tuples[splittingAttr] in branches) == true:
+    #        branches[splittingAttr].append
+    #    else:
+    #        branches.append([tuples[splittingAttr], [tuples]])
+        
+        #    branches.append(tuples)
+    
+    print()
+    #print(branches[0])
+    #sys.exit()
+    
+    return(finalBranches)
+
+def generateDecisionTree(data, attributeList, exclusionList):
     print("Building Tree")
+    #print(data)
     continuousValues = 0
     # check if all data belong to the same class
     purity = checkIfClassesPure(data)
@@ -154,53 +242,78 @@ def generate_decision_tree(data, attributeList, exclusionList):
     
     if splittingAttr == "Age" or splittingAttr == "fnlwgt" or splittingAttr == "Education_Num" \
         or splittingAttr == "Capital_Gain" or splittingAttr == "Capital_Loss" or splittingAttr == "Hours_Per_Week":
-            continuous = 1
+            continuousValues = 1
             print("------->", splittingAttr)
             splittingThreshold = getSplitPoint(data, splittingAttr, index)
             print(splittingThreshold)
             
     if continuousValues == 1: #The splitting attribute contains continuous values
-        dataLeftBranch, dataRightBranch = partition(data, splittingThreshold)
+        dataLeftBranch, dataRightBranch = partition(data, splittingAttr, splittingThreshold)
+        leftBranch = generateDecisionTree(dataLeftBranch, attributeList, exclusionList)
+        rightBranch = generateDecisionTree(dataRightBranch, attributeList, exclusionList)
+        return(DecisionNode(splittingAttr, leftBranch, rightBranch))
     else:
-        return
+        print("-->", splittingAttr)
+        branches = createBranches(data, splittingAttr)
+        #print(branches[0])
+        #print("LENGTH = ", len(branches))
+        
+        discBranches = emptyArray(len(branches))
+        print(discBranches)
+        
+        for i in range(0, len(branches)):
+            discBranches[i] = generateDecisionTree(branches[i], attributeList, exclusionList)
             
+        
+        #for index, brnData in branches:
+        #    discBranches[index] = generateDecisionTree(brnData, attributeList, exclusionList)
+        
+        #print
+        #for brnData, brn in branches, discBranches:
+            #brn = generateDecisionTree(brnData, attributeList, exclusionList)
+        
+        #print(discBranches)
+        #for obj in discBranches:
+        #    print(obj)
             
     
-    #generate_decision_tree(data, attributeList, exclusionList)
     
+    #generateDecisionTree(data, attributeList, exclusionList)
     
     return   
         
         
-def partition(data, splittingAttribute):
+def partition(data, splittingAttribute, splitPoint):
+    print("Parition Data on Splitting Attribute")
+    
     dataLeftBranch = []
     dataRightBranch = []
     
+    print(splittingAttribute,"@", splitPoint)
+    #print(data)
+    #for val in data:
+        #print(val[0])
+    for tuples in data:
+        #print(tuples[splittingAttribute])
+        if tuples[splittingAttribute] > splitPoint:
+            dataRightBranch.append(tuples)
+        else:
+            dataLeftBranch.append(tuples)
+        
+    print("LENGTH L =", len(dataLeftBranch), "R =", len(dataRightBranch))
     
+    return dataLeftBranch, dataRightBranch
+
+def printTree(rootNode):
+    if isinstance(rootNode, LeafNode):
+        print("TRUE")
+        #print("\t", rootNode.data)
+        return
     
-    return leftBranch, rightBranch
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print(rootNode.name)
+    print("Left")
+    printTree(rootNode.leftBranch)
+    print("Right")
+    printTree(rootNode.rightBranch)
 
 

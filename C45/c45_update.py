@@ -31,8 +31,7 @@ exclusionList = []
 for index, row in data_df.iterrows():
     listTuples.append(row)
     
-decisionTree = generate_decision_tree(listTuples, attributeList, exclusionList)
-
+decisionTree = generateDecisionTree(listTuples, attributeList, exclusionList)
 
 
 
@@ -40,3 +39,6 @@ decisionTree = generate_decision_tree(listTuples, attributeList, exclusionList)
 
 
 print("\n\n------------------------------------------------------------\nDone")
+
+printTree(decisionTree)
+
