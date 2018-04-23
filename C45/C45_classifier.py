@@ -28,13 +28,23 @@ def dump(obj):
   for attr in dir(obj):
     print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
+def leaf_class_label(partitioned_data):
+    yes = 0
+    no = 0
+    for values in partitioned_data:
+        if values['Amount'] == ">50K":
+            yes += 1
+        else:
+            no += 1
+    if yes > no:
+        return(">50K")
+    else:
+        return("<=50K")
+
 class LeafNode:
-    def __init__(self, partitioned_sample_data):
-        self.data = partitioned_sample_data
-        
-    def getData(self):
-        return self.data
-            
+    def __init__(self, partitioned_data):
+        self.classLabel = leaf_class_label(partitioned_data)
+      
 class DecisionNode:
     def __init__(self, question, leftBranch, rightBranch):
         self.question = question
@@ -68,7 +78,7 @@ class Question:
         # feature value in this question.
         val = example[self.column]
         if is_numeric(val):
-            return val >= self.value
+            return val > self.value #changed from >= to >
         else:
             return val == self.value
 
@@ -79,7 +89,7 @@ class Question:
         if is_numeric(self.value):
             condition = ">"
             
-        print(self.column, self.value)
+        #print(self.column, self.value)
         
         return "Is %s %s %s?" % (
             fixedAttributeList[self.column], condition, str(self.value))
@@ -87,6 +97,7 @@ class Question:
 """
 -------------------------------------------------------------------------------
 """
+
 
 '''
 Returns an empty list of the list of attributes which are empty,
@@ -180,47 +191,31 @@ def gain(info, info_a):
     #print("X| info_a = ", info_a)
     
     gain = info - info_a
-    
+
     return gain
 
 def gainRatio(gain, splitInfo):
     if gain == 0 or splitInfo == 0:
         return(0)
     gainRatio = gain / splitInfo
-    
+
     return gainRatio
 
 def gini(pi):
-    #print("GINI(D)")
-    #print("  ", pi)
     total = 0
     for p in pi:
-       # print("  ",p)
         p = p / sum(pi)
-        #print("    ", p)
         p = pow(p, 2)
-        #print("      ", p)
         if p != 0:
             total -= p
         else:
             total += 0
     total += 1
-    #print("    gini(", pi, ") =", total)
     return(total)
 
 def gini_attribute(sum_data, yes_no_subset):
-    #print("Gini_A")
-    #print("  ", yes_no_subset)
-    
-    #sum_data = 0
-    #for pairs in yes_no_subset:
-    #    sum_data += sum(pairs)
-    
     total = 0
     for values in yes_no_subset:
-        #print("->", values)
-        #print("      sum =", sum(values))
-        #print(gini(values))
         total += (sum(values)/sum(sum_data)) * gini(values)
 
     return(format(total, '.5f'))
@@ -229,29 +224,20 @@ def calc_entropy(infoData, attribute):
     info_attribute = []
     for value in attribute:
         info_attribute.append([value[1], value[2]])
-    
+
     info_ofdata = info(infoData)
     info_ofattribute = info_a(infoData, info_attribute)
-    #print("info(d) = ", info_ofdata)
-    #print("info_a(d) = ", info_ofattribute)
     infogain = gain(info_ofdata, info_ofattribute)
-    #print("gain(a) = ", infogain)
     splitinfo_ofattribute = splitinfo_a(infoData, info_attribute)
-    #print("splitinfo_a(d) = ",splitinfo_ofattribute)
     gainratio = gainRatio(infogain, splitinfo_ofattribute)
-    #if gainratio == 0:
-    #    sys.exit()
-    #print("gainratio(a) = ", gainratio)
-    
+
     return infogain, gainratio
 
 def get_entropy(infoData, attrAnswers):
     info_gain = 0
     gain_ratio = 0
     filledEntropyList = empty_attr_list()
-    #print("\nIN ENTROPY")
-    #print(empty_attr_list)
-    #print()
+
     i = 0
     for attribute in attrAnswers:
         info_gain, gain_ratio = calc_entropy(infoData, attribute)
@@ -259,22 +245,20 @@ def get_entropy(infoData, attrAnswers):
         filledEntropyList[i].append(format(gain_ratio, '.5f'))
         i += 1
     
-    #print(filledEntropyList)
     return(filledEntropyList)
 
 def checkIfClassesPure(data):
     yes = 0
     no = 0
+    
     for tuples in data:
         if yes == 1 and no == 1: # not pure
-            #print("NOT PURE")
             return(0)
         if tuples['Amount'] == ">50K":
             yes = 1
         if tuples['Amount'] == "<=50K":
             no = 1
-    
-    #print("PURE DATA")
+
     return(1)
 
 def get_info(data, funcSwitch, candidateSplitPoint=None):
@@ -293,8 +277,6 @@ def get_info(data, funcSwitch, candidateSplitPoint=None):
                 no += 1
 
     return([yes, no])
-    
-
 
 def check_class_labels(value, class_answer, listClassAnswers):
     """
@@ -313,7 +295,7 @@ def check_class_labels(value, class_answer, listClassAnswers):
     yes = 1
     no = 2
     inlst = 0
-    
+
     if value == "?":
         save_ndx = 0
         maxTotal = 0
@@ -322,15 +304,13 @@ def check_class_labels(value, class_answer, listClassAnswers):
                 maxTotal = (listClassAnswers[ndx][1] + listClassAnswers[ndx][2])
                 save_ndx = ndx
                 inlst = 1
-        
         if inlst == 0:
             return
-            
         if class_answer == ">50K":
             listClassAnswers[save_ndx][yes] += 1
         else:
             listClassAnswers[save_ndx][no] += 1
-        
+
         return
     
     for val in listClassAnswers: #check to see if this value is in the list, inc necessary value
@@ -341,7 +321,6 @@ def check_class_labels(value, class_answer, listClassAnswers):
             else:
                 val[no] += 1
             break
-
     if inlst == 0: #if not in the list, add it
         if class_answer == ">50K":
             listClassAnswers.append([value, 1, 0])
@@ -356,7 +335,7 @@ but if funcSwitch == 2, all it is is the length of the candidates getting passed
 """
 def cnt_class_values(funcSwitch, data, attributeList=None):
     attrCounts = empty_attr_list()
-    
+
     if funcSwitch == 1:
         for tuples in data:
             for j in range(0, 14): # -1 to avoid counting class: amount
@@ -384,192 +363,108 @@ def cnt_class_values(funcSwitch, data, attributeList=None):
                 else:
                     noBelow += 1    
         classAttr = [[yesAbove, noAbove], [yesBelow, noBelow]]
-        
+
         return(classAttr)
-    
+
     return(attrCounts)
 
 def check_attribute_available(index, reducedAttributeList):
     availableToUse = 0
-    
+
     if fixedAttributeList[index] in reducedAttributeList:
-        #print("TRUE -> YOU CAN USE THAT")
         availableToUse = 1
     else:
-        #print("False -> NO YOU CAN'T USE IT, PICK SOMETHIING ELSE")
         availableToUse = 0
-    
+
     return(availableToUse)
 
 def attribute_selection_method(data, reducedAttributeList):
-    print("Selecting Attribute with highest Gain Ratio")
+    print("      Selecting Attribute with highest Gain Ratio")
     funcSwitch = 1
-    
     attrClassCount = cnt_class_values(funcSwitch, data)
     infoData = get_info(data, funcSwitch)
-    entropyList = get_entropy(infoData, attrClassCount)
-    
-    print("  Yes/No =", infoData)
-    #print("All Entropy Values")
-    #print("Info Gain   Gain Ratio")
-    
-    #i = 0
-    #for val in entropyList:
-    #    print(val, i)
-    #    i += 1
-        
-    
+    entropyList = get_entropy(infoData, attrClassCount)    
     # Use gain selection to determine if you want to use information gain or gain ratio
     # default for C45 is gain ratio
     gainSelection = 1
     highestGain = 0
     saveIndex = 0
     index = 0
-    
-    
+
     for gains in entropyList:
         if check_attribute_available(index, reducedAttributeList) == 1:
             if float(gains[gainSelection]) > float(highestGain):
                 highestGain = gains[gainSelection]
                 saveIndex = index
         index += 1
-        
-    print("-->", highestGain, "@ index:", saveIndex, fixedAttributeList[saveIndex])
     
-    newReducedAttributeList = reducedAttributeList
-    newReducedAttributeList.remove(fixedAttributeList[saveIndex])
-    return(fixedAttributeList[saveIndex], saveIndex, highestGain, newReducedAttributeList)
+    if highestGain == 0:
+        return(None, None, highestGain, None)
+    else:
+        newReducedAttributeList = reducedAttributeList
+        newReducedAttributeList.remove(fixedAttributeList[saveIndex])
+        return(fixedAttributeList[saveIndex], saveIndex, highestGain, newReducedAttributeList)
 
 def testThreshold(data, candidateSplitPoint, lengthUniqueValues):
     funcSwitch = 2
-    #print("\nGetting info gain of threshold")
-    
     info = get_info(data, funcSwitch, candidateSplitPoint)
-    
     funcSwitch = 3
     attrClassCount = cnt_class_values(funcSwitch, data, candidateSplitPoint)
-    #print(attrClassCount)
-    
     expectedMinInfo = info_a(info, attrClassCount)
-    #print(expectedMinInfo)    
-    
-    #countAttributes = cntClass(funcSwitch, data, lengthUniqueValues)
-    #print(countAttributes)
-    #countAttributes.pop() # removes extra list
-    #for val in countAttributes:
-    #    print(val)
-    
-    #print(countAttributes)
-    
-    #print()
-    #print("------------------------------")
-    #print(countAttributes[0])
-    #print(countAttributes[1])
     
     return(expectedMinInfo, candidateSplitPoint)
 
 def getThreshold(data, candidateSplitPoints, lengthUniqueValues):
-    #print("\nGetting Threshold")
-    #threshold = 0
-    #print(data)
-    #print("SP = ", candidateSplitPoints)
-    #print()
-    #lengthCandidates = len(candidateSplitPoints)
-    #print(candidateSplitPoints)
-    #print("length of candidates =", lengthCandidates,"\n")
-    #print(data)
-    #print("length of list =", len(data),"\n")
-    
     lowestGain = 100
     splitPoint = 0
     
-    #test = []
-    
-    
-    print("expected information")
     for candidate in candidateSplitPoints:
-        #print(candidate)
         infoGainThreshold, possibleSplitPoint = testThreshold(data, candidate, lengthUniqueValues)
-        #test.append([infoGainThreshold, possibleSplitPoint])
-        
-        #print(infoGainThreshold, possibleSplitPoint, candidate)
         
         if infoGainThreshold < lowestGain:
             lowestGain = infoGainThreshold
             splitPoint = candidate
 
-    #print()
-    #for val in test:
-    #    print(val)
-    #print()
-    #for pairs in test:
-    #    print(pairs)
-    #print(lowestGain, splitPoint)
-    
     return(splitPoint)
 
 def calcSplitPoints(uniqueValues):
-    #print("calcualte possible split points")
-    
     candidateSplittingPoints = []
     for i in range(0, len(uniqueValues)-1):
-        #print(uniqueValues[i])
-        #splitPoint =
         candidateSplittingPoints.append(int((uniqueValues[i] + uniqueValues[i+1]) / 2))
-    
+
     return(candidateSplittingPoints)
 
 def getSplitPoint(data, splittingAttr, index):
-    print("    getting Splitting criterion")
-    
-    
-    #tmpListValuesClasses = sorted(data, key=attrgetter(splittingAttr))
+    print("          Getting Splitting criterion")
     tmpListValuesClasses = []
     uniqueValues = []
+    
     for tup in data:
-        #print("-->", tup[splittingAttr])
         tmpListValuesClasses.append([tup[splittingAttr], tup['Amount']])
-        
-        
-    #print(tmpListValuesClasses)
+
     for pairs in tmpListValuesClasses:
-        #print(pairs)
         uniqueValues.append(pairs[0])
-    
-    
-    #print(uniqueValues)
+
     uniqueValues = list(set(uniqueValues))
-    #print(uniqueValues)
-    #print("sort it")
     uniqueValues.sort()
-    #print(uniqueValues)
-    #print()
-    
     candidateSplittingPoints = calcSplitPoints(uniqueValues)
     lengthUniqueValues = len(uniqueValues)
-    
-    #print("candidates threshold values", candidateSplittingPoints)
-    #sys.exit()
-    
     splitPoint = getThreshold(tmpListValuesClasses, candidateSplittingPoints, lengthUniqueValues)
-    #print(splitPoint)
-    #sys.exit()
-    #print()
-      
+
     return(splitPoint)
 
 def get_combination(data, splittingAttr):
     uniqueValues = []
     for tuples in data:
         uniqueValues.append(tuples[splittingAttr])
-    
+
     uniqueValues = list(set(uniqueValues))
-    
+
     return(uniqueValues)
 
 def get_possible_subsets(data, uniqueValues):
     possibleSubsets = []
-    
+
     for L in range(0, len(uniqueValues)+1):
         for subset in itertools.combinations(uniqueValues, L):
             sub = []
@@ -577,50 +472,29 @@ def get_possible_subsets(data, uniqueValues):
                 continue
             if len(subset) == len(uniqueValues):
                 continue
-            #print(subset)
             for value in subset:
-                #print("  ", value)
                 sub.append(value)
-            #print(sub)
             possibleSubsets.append(sub)
-            
-    #print(possibleSubsets)
-    #index = 0
-    #for sube in possibleSubsets:
-    #    print(index, sube)
-    #    index += 1
-    #print()
-    #print(possibleSubsets)
-    #print(possibleSubsets[0][0])
-    
+
     return(possibleSubsets)
 
 def calc_gini_index(allData, subsets):
-    #print("Calculating Gini Index")
-    
-    #print(allData)
-    #print(subsets)
-    
     giniIndex = gini_attribute(allData, subsets)
-    #print(giniIndex)
-    
     
     return(giniIndex)
 
 def get_gini_index(data, splittingAttr, possibleSubsets):
-    #print("Getting Gini Index")
     funcSwitch = 1
     allData = get_info(data, funcSwitch)
     saveCandidate = None
     minGiniIndex = 100
     
     for candidate in possibleSubsets:
-        #print("  candidate =", candidate)
         yesCandidate = 0
         noCandidate = 0
         yesNotCandidate = 0
         noNotCandidate = 0
-        
+
         for value in data:
             if value[splittingAttr] in candidate:
                 if value['Amount'] == ">50K":
@@ -632,50 +506,30 @@ def get_gini_index(data, splittingAttr, possibleSubsets):
                     yesNotCandidate += 1
                 else:
                     noNotCandidate += 1
-              
-        #sCand = yesCandidate + noCandidate + yesNotCandidate + noNotCandidate
-        #print("      ", yesCandidate, noCandidate, yesNotCandidate, noNotCandidate, "=", sCand, "of", len(data))
+
         giniIndex = calc_gini_index(allData, [[yesCandidate, noCandidate], [yesNotCandidate, noNotCandidate]])
-        
-        #print("        ", giniIndex)
         
         if float(giniIndex) < float(minGiniIndex):
             minGiniIndex = giniIndex
             saveCandidate = candidate
-        
-    #print()
-    #print(minGiniIndex)
-    #print(saveCandidate)
-                
+
     return(saveCandidate)
 
 def get_splitting_subset(data, splittingAttr, index):
-    print("\nGetting Splitting Subset")
-    
+    print("          Getting Splitting Subset")
     uniqueValues = get_combination(data, splittingAttr)
-    print("Unique Values =", uniqueValues)
     possibleSubsets = get_possible_subsets(data, uniqueValues)
-    
     splittingSubset = get_gini_index(data, splittingAttr, possibleSubsets)
-    
-    #print("Splitting Subset =", splittingSubset)
-    
+
     return(splittingSubset)
 
 def partition(funcSwitch, data, splittingAttribute, splittingCriterion=None):
-    print("Parition Data on Splitting Attribute")
-    
+    print("              Parition Data on Splitting Attribute")
     dataLeftBranch = []
     dataRightBranch = []
-    
-    print("  ", splittingAttribute,"@", splittingCriterion)
-    
+
     if funcSwitch == 1:
-        #print(data)
-        #for val in data:
-            #print(val[0])
         for tuples in data:
-            #print(tuples[splittingAttribute])
             if tuples[splittingAttribute] > splittingCriterion:
                 dataRightBranch.append(tuples)
             else:
@@ -686,92 +540,71 @@ def partition(funcSwitch, data, splittingAttribute, splittingCriterion=None):
                 dataRightBranch.append(tuples)
             else:
                 dataLeftBranch.append(tuples)
-            
+
     return (dataLeftBranch, dataRightBranch)
 
 def generate_decision_tree(data, attributeList):
-    print("\nBuilding Tree")
-    
-    print("|",len(data),"|", "Attributes Available =", len(attributeList))
+    print("    |",len(data),"|", "Attributes Available =", len(attributeList))
     
     # Return if no more data | Return data as leaf if no more attributes to split on
     if len(data) == 0:
         return()
     if len(attributeList) == 0:
+        print("                  No More Attributes, Return Majority Class")
         return(LeafNode(data))
     # check if all data belong to the same class
     purity = checkIfClassesPure(data)
     if purity == 1:
-        print("PURE DATA")
+        print("                  PURE DATA")
         #print(data)
         return(LeafNode(data))
-    
+
     splittingAttr, index, gainRatio, reducedAttributeList = attribute_selection_method(data, attributeList)
-    print("  chose splitting Attribute =", "|->", splittingAttr, "<-|",  \
-          "at index", index, "gain =", "|->", gainRatio, "<-|")
-    
+    #print("  chose splitting Attribute =", "|->", splittingAttr, "<-|",  \
+    #      "at index", index, "gain =", "|->", gainRatio, "<-|")
+    print("        Splitting Attribute =", splittingAttr)
+
     if gainRatio == 0:
         return(LeafNode(data))
-    
+
     continuousValues = 0  
     if splittingAttr == "Age" or splittingAttr == "fnlwgt" or splittingAttr == "Education_Num" \
         or splittingAttr == "Capital_Gain" or splittingAttr == "Capital_Loss" or splittingAttr == "Hours_Per_Week":
             continuousValues = 1
             #print("------->", splittingAttr)
             splittingThreshold = getSplitPoint(data, splittingAttr, index)
-            print("      Split Point =|->", splittingThreshold, "<-|")
+            print("            Split Point =", splittingThreshold)
     else:
         splittingSubset = get_splitting_subset(data, splittingAttr, index)
-        print("      Spliting Subset =|->", splittingSubset)
-        
+        print("            Spliting Subset =", splittingSubset)
 
-        
     if continuousValues == 1: #The splitting attribute contains continuous values
         funcSwitch = 1
-        
-        print()
-        print("splitting attr =", splittingAttr, "split point =", splittingThreshold, "index =", index)
-        
         dataLeftBranch, dataRightBranch = partition(funcSwitch, data, splittingAttr, splittingThreshold)
-        
-        #print()
-        #print(dataRightBranch)
-        #for values in dataLeftBranch:
-        #    print(values[splittingAttr])
-        
-        print("LENGTH L =", len(dataLeftBranch), "R =", len(dataRightBranch))
-        
-        #print("--->", splittingThreshold)
         question = Question(index, splittingThreshold)
-        #print("---->", question)
-        
-        leftBranch = generate_decision_tree(dataLeftBranch, attributeList)
-        rightBranch = generate_decision_tree(dataRightBranch, attributeList)
-        
-        
-        #return(DecisionNode(question, leftBranch, rightBranch))
     else:
-        
-        print()
-        question = Question(index, splittingSubset)
-        print("---->", question)
-        
-        #for tup in data:
-        #    print(tup[splittingAttr])
-        
-        
-        
         funcSwitch = 2
-        leftBranch, rightBranch = partition(funcSwitch, data, splittingAttr, splittingSubset)
-        
-        #return(DecisionNode(question, leftBranch, rightBranch))
-    
+        dataLeftBranch, dataRightBranch = partition(funcSwitch, data, splittingAttr, splittingSubset)
+        question = Question(index, splittingSubset)
+
+    print("                LENGTH L =", len(dataLeftBranch), "R =", len(dataRightBranch))
+    print("  Recursing")
+    leftBranch = generate_decision_tree(dataLeftBranch, attributeList)
+    print("  Recursing")
+    rightBranch = generate_decision_tree(dataRightBranch, attributeList)
+
     return(DecisionNode(question, leftBranch, rightBranch))
 
+"""
+-------------------------------------------------------------------------------
+Function(s) here/below was taken from google's example of a decision tree classifer using
+CART.
+
+"""
 def print_tree(node, spacing=""):
     # Base case: we've reached a leaf
     if isinstance(node, LeafNode):
-        #print (spacing + "Predict", node.data)
+        print (spacing + "Predict", node.classLabel)
         #print(node.getData)
         #dump(node)
         return
@@ -790,90 +623,38 @@ def print_tree(node, spacing=""):
     print (spacing + '--> True:')
     print_tree(node.rightBranch, spacing + "  ")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def classify(row, node):
+    # Base case: we've reached a leaf
+    if isinstance(node, LeafNode):
+        return node.classLabel
+
+    # Decide whether to follow the true-branch or the false-branch.
+    # Compare the feature / value stored in the node,
+    # to the example we're considering.
+    if node.question.match(row):
+        return classify(row, node.rightBranch)
+    else:
+        return classify(row, node.leftBranch)
+
+def print_leaf(counts):
+    """A nicer way to print the predictions at a leaf."""
+    total = sum(counts.values()) * 1.0
+    probs = {}
+    for lbl in counts.keys():
+        probs[lbl] = str(int(counts[lbl] / total * 100)) + "%"
+    return probs
+
+
+
+#Main
 if __name__ == '__main__':
-    
     # Attribute List for data
     attributeList = ["Age", "Workclass", "fnlwgt", "Education", "Education_Num",
                      "Marital_Status", "Occupation", "Relationship", "Race", "Sex",
                      "Capital_Gain", "Capital_Loss", "Hours_Per_Week", "Native_Country", "Amount"]
 
     # load Sample data to datafram
-    sample_data = pd.read_csv('adult_short.data', sep= ', ', header= None, engine= 'python')
+    sample_data = pd.read_csv('adult_small.data', sep= ', ', header= None, engine= 'python')
     sample_data.columns = attributeList
     # Split the data into training/test with a
     training_data, test_data = train_test_split(sample_data, test_size=0.2)
@@ -885,10 +666,6 @@ if __name__ == '__main__':
     trainingData = []
     testData = []
 
-    #print(training_data)
-    #print(test_data)
-    #exclusionList = []
-
     # Convert dataframe to a list
     for index, row in training_data.iterrows():
         trainingData.append(row)
@@ -896,9 +673,61 @@ if __name__ == '__main__':
         testData.append(row)
 
     attributeList.pop()
+    print("\nBuilding Tree/Fit Data")
     decisionTree = generate_decision_tree(trainingData, attributeList)
-    print("\n\n--------------------------------------------------------\nDone")
+    print("------------------------------------------------------------------")
+    print("Finished Fitting Data")
 
-    #printTree(decisionTree)
+    print_tree(decisionTree)
 
-    #print_tree(decisionTree)
+    print()
+    print("Classify")
+    #for row in testData:
+        #print ("Actual: %s. Predicted: %s" %
+               #(row[-1], print_leaf(classify(row, decisionTree))))
+
+
+    TP = 0
+    TN = 0
+    FP = 0
+    FN = 0
+    for row in testData:
+        predict = classify(row, decisionTree)
+        actual = row['Amount']
+        print("Predicted", predict, "  |Actual =", actual, )
+        
+        if predict == row['Amount']:
+            if predict == ">50K":
+                TP += 1
+                #print("\tTrue Positive")
+            else:
+                TN += 1
+                #print("\tTrue Negative")
+        else:
+            if predict == ">50K":
+                if actual == "<=50K":
+                    print("\tFalse Positive")
+                    FP += 1
+                else:
+                    print("\tFalse Negative")
+                    FN += 1
+            if predict == "<=50K":
+                if actual == ">50K":
+                    print("\tFalse Negative")
+                    FN += 1
+                else:
+                    print("\tFalse Positive")
+                    FP += 1
+
+
+    funcSwitch = 1
+    classLabels = get_info(testData, funcSwitch)
+    print(classLabels)
+    print()
+    print("TP =", TP,
+          "TN =", TN,
+          "FP =", FP,
+          "FN =", FN)
+    #errorRate = (FP + FN)/
+
+
