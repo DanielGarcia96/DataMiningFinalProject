@@ -654,7 +654,7 @@ if __name__ == '__main__':
                      "Capital_Gain", "Capital_Loss", "Hours_Per_Week", "Native_Country", "Amount"]
 
     # load Sample data to datafram
-    sample_data = pd.read_csv('adult_small.data', sep= ', ', header= None, engine= 'python')
+    sample_data = pd.read_csv('adult.data', sep= ', ', header= None, engine= 'python')
     sample_data.columns = attributeList
     # Split the data into training/test with a
     training_data, test_data = train_test_split(sample_data, test_size=0.2)
@@ -723,11 +723,25 @@ if __name__ == '__main__':
     funcSwitch = 1
     classLabels = get_info(testData, funcSwitch)
     print(classLabels)
+    sumPN = sum(classLabels)
+    
     print()
     print("TP =", TP,
           "TN =", TN,
           "FP =", FP,
           "FN =", FN)
-    #errorRate = (FP + FN)/
+    errorRate = (FP + FN) / sumPN
+    acc = (TP + TN) / sumPN
+    tpr = TP / classLabels[0]
+    tnr = TN / classLabels[1]
+    prec = TP / (TP + FP)
+    
+    print("error rate =", errorRate,
+          "accuracy =", acc,
+          "TPR =", tpr,
+          "TNR =", tnr,
+          "Precision =", prec)
+
+
 
 
