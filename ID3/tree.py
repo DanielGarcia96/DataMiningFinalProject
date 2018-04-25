@@ -58,7 +58,35 @@ class ID3_Tree(object):
             else:
                 self.attrs[i] = 'non-numeric'
 
-                                                        # indicates a numeric attribute
+    # Determine what kind of node this is
+    def determine_identifier(self):
+        # If there is no data, pick a class at random
+        if self.data.shape[0] == 0:
+            return ("class", random.choice(self.classes))
+        class_candidates = dict()
+
+        # Check for a majority
+        for i in self.classes:
+            num = self.data[self.data.iloc[:,-1] == i].shape[0]
+            class_candidates[i] = num / self.data.shape[0]
+
+        # If there is a proper majority, this node is a class
+        best = max(class_candidates, key=class_candidates.get, default=self.classes[0])
+        if(class_candidates[best] >= self.majority):
+            return ("class", best)
+
+
+        logging.debug("Length of self.data.columns: " +
+                        '('+str(self.data.columns.shape[0])+')\n')
+
+        # If we've run out of attributes to test on, basic majority wins
+        if(self.data.columns.shape[0] <= 1):
+            return ("class", best)
+
+        # Otherwise, this is a test node and the attribute to test on will be selected
+        # by the attribute selector
+        return ("test", self.information_gain_selector(self.data.columns, self.data, self.classes))
+
     def __str__(self):
         data_string = "Data:\n\t" + ' '.join(self.data) + "\n"
         attribute_string = "Attributes:\n\t" + ' '.join(self.data.columns) + "\n"
@@ -93,69 +121,12 @@ class ID3_Tree(object):
         
         return result_string
 
-    # Determine what kind of node this is
-    def determine_identifier(self):
-        #pdb.set_trace()
-
-        #print(self.data.shape)
-        #if(self.data.shape[0] <= 5):
-            #print(self.data)
-        #print(self.data.columns)
-        #print(self.data.columns.shape)
-        #print("\n")
-        # Check for a majority
-        #print("Size : " + str(self.data.shape[0])+", "+str(self.data.shape[1]))
-
-        # If there is no data, pick a class at random
-        if self.data.shape[0] == 0:
-            return ("class", random.choice(self.classes))
-        class_candidates = dict()
-        for i in self.classes:
-            num = self.data[self.data.iloc[:,-1] == i].shape[0]
-            class_candidates[i] = num / self.data.shape[0]
-            #print("Percent " + i + ": " + str(class_candidates[i] * 100))
-
-        # If there is a proper majority, this node is a class
-        best = max(class_candidates, key=class_candidates.get, default=self.classes[0])
-        if(class_candidates[best] >= self.majority):
-            return ("class", best)
-            #print("Got a proper majority on " + best)
-
-
-        logging.debug("Length of self.data.columns: " +
-                        '('+str(self.data.columns.shape[0])+')\n')
-
-        # If we've run out of attributes to test on, basic majority wins
-        if(self.data.columns.shape[0] <= 1):
-            #print("Resorting to a basic majority of " + best)
-            return ("class", best)
-
-        # Otherwise, this is a test node and the attribute to test on will be selected
-        # by the attribute selector
-        #print("Must be a test")
-        return ("test", self.information_gain_selector(self.data.columns, self.data, self.classes))
-
-    def dump(self):
-        logging.debug("self.data:")
-        logging.debug(' '.join(self.data))
-        logging.debug("self.b_count: " + str(self.b_count))
-        logging.debug("self.attrs: " + ' '.join(self.attrs))
-        logging.debug("self.branches:")
-        logging.debug(self.branches)
-        logging.debug("self.majority: " + str(self.majority))
-        logging.debug("self.identifier:")
-        logging.debug(self.identifier)
-        logging.debug("self.classes: ")
-        logging.debug(self.classes)
-        logging.debug("self.numeric_cutoff: " + str(self.numeric_cutoff) + "\n")
-
     def is_numeric(self, data, attr):
         logging.debug("Testing: " + attr)
         logging.debug("Accessing value: " + str(data.iloc[0][attr]))
         return data[attr].unique().shape[0] >= self.numeric_cutoff and is_number(data.iloc[0][attr])
 
     def information_gain_selector(self, attr, data, classes):
-        #pdb.set_trace()
         # calculate expected information to classify a tuple
         expected_info = 0.0
         d_size = data.shape[0]
@@ -231,7 +202,6 @@ class ID3_Tree(object):
 
     # Train the tree
     def fit(self):
-        #pdb.set_trace()
         # If this is a class, it's a terminating condition
         if self.identifier[0] == "class":
             return
@@ -240,8 +210,6 @@ class ID3_Tree(object):
             # Check for a numeric test
             if self.attrs[self.identifier[1]] == 'numeric':
                 # Create a branch for all values below the median
-                #print("Dropping from below " + self.identifier[1])
-                #print("Creating branch below on " + self.identifier[1])
                 self.branches['below'] =  ID3_Tree (
                     self.data.loc[self.data[self.identifier[1]] <=
                         self.data[self.identifier[1]].median()]
@@ -255,8 +223,6 @@ class ID3_Tree(object):
                 self.branches['below'].fit()
 
                 # Create a branch for all values above the median
-                #print("Dropping from above " + self.identifier[1])
-                #print("Creating branch above on " + self.identifier[1])
                 self.branches['above'] = ID3_Tree (
                     self.data.loc[self.data[self.identifier[1]] >
                         self.data[self.identifier[1]].median()].
@@ -271,8 +237,6 @@ class ID3_Tree(object):
             # Must be non-numeric test
             else:
                 for i in self.data[self.identifier[1]].unique():
-                    #print("Dropping " + self.identifier[1])
-                    #print("Creating branch on " + str(i))
                     self.branches[i] = ID3_Tree (
                         self.data.loc[self.data[self.identifier[1]] == i].
                             drop(self.identifier[1], axis=1),
@@ -287,25 +251,16 @@ class ID3_Tree(object):
 
     # Classify a particular record
     def classify(self, datum):
-        #print(self.identifier)
         # If this is a class, we've reached the end
         if self.identifier[0] == "class":
-            #print("Found a class")
             return self.identifier[1]
         # Otherwise, look at the next level down
         elif self.attrs[self.identifier[1]] == 'numeric':
-            #print("Going through numeric test")
-            #print(datum[self.identifier[1]])
             if datum[self.identifier[1]] <= self.data[self.identifier[1]].median():
-                #print("Went below")
                 return self.branches['below'].classify(datum)
             else:
-                #print("Went above")
                 return self.branches['above'].classify(datum)
         else:
-            #print("Going through nominal test")
-            #print(self.branches[datum[self.identifier[1]]])
-            #print(self.branches.keys())
             if datum[self.identifier[1]] in self.branches.keys():
                 return self.branches[datum[self.identifier[1]]].classify(datum)
             else:
@@ -328,7 +283,28 @@ def is_number(s):
 
 df = pd.read_csv('adult.data.csv', sep=',', header=0)
 
-t1 = ID3_Tree(df, classes=("<=50K", ">50K"), numeric_cutoff=15)
+t1 = ID3_Tree(df, classes=("<=50K", ">50K"), majority=0.6, numeric_cutoff=15)
+t1.fraction(0.5)
+
+print("Fitting adult dataset with 0.6 threshold, this could take a minute or two...")
+t1.fit()
+
+print("Classifying adult test data: ")
+pass_count = 0
+fail_count = 0
+for i in range(df.shape[0]):
+    result = t1.classify(df.iloc[i])
+
+    if df.iloc[i][-1] == result:
+        pass_count += 1
+    else:
+        fail_count += 1
+
+print("Properly identified records: %d" % pass_count)
+print("Improperly identified records: %d" % fail_count)
+print("Error Rate: %0.2f%%\n\n" % ((fail_count / (pass_count + fail_count)) * 100))
+
+t1 = ID3_Tree(df, classes=("<=50K", ">50K"), majority=0.8, numeric_cutoff=15)
 t1.fraction(0.5)
 
 print("Fitting adult dataset with 0.8 threshold, this could take a minute or two...")
@@ -347,13 +323,13 @@ for i in range(df.shape[0]):
 
 print("Properly identified records: %d" % pass_count)
 print("Improperly identified records: %d" % fail_count)
-print("Error Rate: %0.2f%%" % ((fail_count / (pass_count + fail_count)) * 100))
+print("Error Rate: %0.2f%%\n\n" % ((fail_count / (pass_count + fail_count)) * 100))
 
 df = pd.read_csv('bupa.data.csv', sep=',', header=0)
 
 t2 = ID3_Tree(df)
 
-print("Fitting bupa dataset with 0.8 threshold, this could take a minute or two...")
+print("Fitting bupa dataset with 0.9 threshold, this could take a minute or two...")
 t2.fit()
 
 print("Classifying bupa test data: ")
@@ -369,4 +345,4 @@ for i in range(df.shape[0]):
 
 print("Properly identified records: %d" % pass_count)
 print("Improperly identified records: %d" % fail_count)
-print("Error Rate: %0.2f%%" % ((fail_count / (pass_count + fail_count)) * 100))
+print("Error Rate: %0.2f%%\n\n" % ((fail_count / (pass_count + fail_count)) * 100))
