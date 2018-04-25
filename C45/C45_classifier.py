@@ -5,6 +5,9 @@ Created on Thu Apr 19 10:01:58 2018
 @author: Kyle
 """
 
+import timeit
+import time
+
 import itertools
 import sys
 from math import log
@@ -494,6 +497,8 @@ def get_gini_index(data, splittingAttr, possibleSubsets):
         noCandidate = 0
         yesNotCandidate = 0
         noNotCandidate = 0
+        
+        #print(candidate)
 
         for value in data:
             if value[splittingAttr] in candidate:
@@ -509,19 +514,88 @@ def get_gini_index(data, splittingAttr, possibleSubsets):
 
         giniIndex = calc_gini_index(allData, [[yesCandidate, noCandidate], [yesNotCandidate, noNotCandidate]])
         
+        #print(giniIndex)
+        
         if float(giniIndex) < float(minGiniIndex):
             minGiniIndex = giniIndex
             saveCandidate = candidate
 
-    return(saveCandidate)
+    return(saveCandidate, float(minGiniIndex))
+
+def partition_possible_subsets(possibleSubsets):
+    partitionedPossibleSubsets = []
+    fraction = len(possibleSubsets) * 0.15
+    fraction = int(fraction)
+    
+    #print("PS  ->", len(possibleSubsets))
+    #print("PPS ->", len(partitionedPossibleSubsets))
+    
+    tmp = []
+    count = 0
+    while len(possibleSubsets) != 0:
+        #print(len(possibleSubsets), count, fraction)
+        if count == fraction:
+            #print("\t\t", count, fraction, len(tmp))
+            partitionedPossibleSubsets.append(tmp)
+            #print("\t", len(partitionedPossibleSubsets))
+            count = 0
+            tmp = []
+            #print(tmp, count)
+            #time.sleep(15)
+        else:
+            tmp.append(possibleSubsets.pop())
+            count += 1
+
+    #print("PS  -->", len(possibleSubsets))
+    #print("PPS -->", len(partitionedPossibleSubsets))
+    #print("TMP -->", len(tmp))
+        #partitionedPossibleSubsets.append(tmp)
+    #print()        
+    #print(possibleSubsets)
+    #print(len(partitionedPossibleSubsets))
+    #print()
+    
+    #print(len(partitionedPossibleSubsets[-1]))
+    #print(len(partitionedPossibleSubsets[-2]))
+    #print()
+    #print(partitionedPossibleSubsets)
+    #print(partitionedPossibleSubsets[1])
+        
+    #print()
+    #print("->STOP<-")
+    #sys.exit()
+        
+        
+        
+    return(partitionedPossibleSubsets)
 
 def get_splitting_subset(data, splittingAttr, index):
     print("          Getting Splitting Subset")
     uniqueValues = get_combination(data, splittingAttr)
     possibleSubsets = get_possible_subsets(data, uniqueValues)
-    splittingSubset = get_gini_index(data, splittingAttr, possibleSubsets)
+    if splittingAttr == "Education":
+        #print("EDU")
+        partitionedSubsets = partition_possible_subsets(possibleSubsets)    
+    
+        saveSplittingSubset = None
+        saveGiniIndex = 100
+        
+        for part in partitionedSubsets:
+            splittingSubset, giniIndex = get_gini_index(data, splittingAttr, part)
+            #print(giniIndex, splittingSubset)
+            if giniIndex < saveGiniIndex:
+                saveSplittingSubset = splittingSubset
+                saveGiniIndex = giniIndex
+    else:
+        saveSplittingSubset, giniIndex = get_gini_index(data, splittingAttr, possibleSubsets)
+            
 
-    return(splittingSubset)
+
+    #print()
+    #print("-|STOP|-")
+    #sys.exit()    
+
+    return(saveSplittingSubset)
 
 def partition(funcSwitch, data, splittingAttribute, splittingCriterion=None):
     print("              Parition Data on Splitting Attribute")
@@ -563,6 +637,14 @@ def generate_decision_tree(data, attributeList):
     #print("  chose splitting Attribute =", "|->", splittingAttr, "<-|",  \
     #      "at index", index, "gain =", "|->", gainRatio, "<-|")
     print("        Splitting Attribute =", splittingAttr)
+
+
+    #---------------
+    
+    #splittingAttr = "Education"
+    #---------------
+
+
 
     if gainRatio == 0:
         return(LeafNode(data))
@@ -646,8 +728,35 @@ def print_leaf(counts):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Main
 if __name__ == '__main__':
+    
+    start = timeit.default_timer()
+
+    
     # Attribute List for data
     attributeList = ["Age", "Workclass", "fnlwgt", "Education", "Education_Num",
                      "Marital_Status", "Occupation", "Relationship", "Race", "Sex",
@@ -673,6 +782,7 @@ if __name__ == '__main__':
         testData.append(row)
 
     attributeList.pop()
+  
     print("\nBuilding Tree/Fit Data")
     decisionTree = generate_decision_tree(trainingData, attributeList)
     print("------------------------------------------------------------------")
@@ -694,7 +804,7 @@ if __name__ == '__main__':
     for row in testData:
         predict = classify(row, decisionTree)
         actual = row['Amount']
-        print("Predicted", predict, "  |Actual =", actual, )
+        #print("Predicted", predict, "  |Actual =", actual, )
         
         if predict == row['Amount']:
             if predict == ">50K":
@@ -706,17 +816,17 @@ if __name__ == '__main__':
         else:
             if predict == ">50K":
                 if actual == "<=50K":
-                    print("\tFalse Positive")
+                    #print("\tFalse Positive")
                     FP += 1
                 else:
-                    print("\tFalse Negative")
+                    #print("\tFalse Negative")
                     FN += 1
             if predict == "<=50K":
                 if actual == ">50K":
-                    print("\tFalse Negative")
+                    #print("\tFalse Negative")
                     FN += 1
                 else:
-                    print("\tFalse Positive")
+                    #print("\tFalse Positive")
                     FP += 1
 
 
@@ -743,5 +853,10 @@ if __name__ == '__main__':
           "Precision =", prec)
 
 
+    #Your statements here
+
+    stop = timeit.default_timer()
+
+    print(stop - start)
 
 
