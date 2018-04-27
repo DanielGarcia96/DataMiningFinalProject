@@ -17,7 +17,7 @@ How to run:
   c. Run tree.py  
   
 2.) C4.5  
-  a. Navigate to ..\DataMiningFinalProject\C45 
+  a. Navigate to ..\DataMiningFinalProject\C45  
   b. Open C45_classifier.py  
   c. Run C45_Classifier.py  
   
