@@ -28,6 +28,7 @@ import math
 import random
 import logging
 import pandas as pd
+from preprocess import create_and_process_data
 
 logging.basicConfig(filename='tree.log', level=logging.DEBUG)
 
@@ -281,7 +282,7 @@ def is_number(s):
         return False
 
 
-df = pd.read_csv('adult.data.csv', sep=',', header=0)
+df = create_and_process_data()
 
 t1 = ID3_Tree(df, classes=("<=50K", ">50K"), majority=0.6, numeric_cutoff=15)
 t1.fraction(0.5)
@@ -290,19 +291,44 @@ print("Fitting adult dataset with 0.6 threshold, this could take a minute or two
 t1.fit()
 
 print("Classifying adult test data: ")
-pass_count = 0
-fail_count = 0
+p = 0
+n = 0
+tp = 0
+tn = 0
+fp = 0
+fn = 0
 for i in range(df.shape[0]):
     result = t1.classify(df.iloc[i])
-
-    if df.iloc[i][-1] == result:
-        pass_count += 1
+    
+    if result == "<=50K":
+        if df.iloc[i][-1] == result:
+            n += 1
+            tn += 1
+        else:
+            p += 1
+            fn += 1
     else:
-        fail_count += 1
+        if df.iloc[i][-1] == result:
+            p += 1
+            tp += 1
+        else:
+            n += 1
+            fp += 1
 
-print("Properly identified records: %d" % pass_count)
-print("Improperly identified records: %d" % fail_count)
-print("Error Rate: %0.2f%%\n\n" % ((fail_count / (pass_count + fail_count)) * 100))
+print("Total records: %d" % (p + n))
+print("Positive records: %d" % p)
+print("Negative records: %d" % n)
+print("True Positive records: %d" % tp)
+print("True Negative records: %d" % tn)
+print("False Positive records: %d" % fp)
+print("False Negative records: %d" % fn)
+print("Properly identified records: %d" % (tp +  tn))
+print("Improperly identified records: %d" % (fp + fn))
+print("Error Rate: %0.2f%%" % (((fp + fn) / (p + n)) * 100))
+print("Accuracy: %0.2f%%" % (((tp + tn) / (p + n)) * 100))
+print("Sensitivity: %0.2f%%" % ((tp / p) * 100))
+print("Specificity: %0.2f%%" % ((tn / n) * 100))
+print("Precision: %0.2f%%\n\n" % ((tp / (tp + tn)) * 100))
 
 t1 = ID3_Tree(df, classes=("<=50K", ">50K"), majority=0.8, numeric_cutoff=15)
 t1.fraction(0.5)
@@ -311,19 +337,44 @@ print("Fitting adult dataset with 0.8 threshold, this could take a minute or two
 t1.fit()
 
 print("Classifying adult test data: ")
-pass_count = 0
-fail_count = 0
+p = 0
+n = 0
+tp = 0
+tn = 0
+fp = 0
+fn = 0
 for i in range(df.shape[0]):
     result = t1.classify(df.iloc[i])
 
-    if df.iloc[i][-1] == result:
-        pass_count += 1
+    if result == "<=50K":
+        if df.iloc[i][-1] == result:
+            n += 1
+            tn += 1
+        else:
+            p += 1
+            fn += 1
     else:
-        fail_count += 1
+        if df.iloc[i][-1] == result:
+            p += 1
+            tp += 1
+        else:
+            n += 1
+            fp += 1
 
-print("Properly identified records: %d" % pass_count)
-print("Improperly identified records: %d" % fail_count)
-print("Error Rate: %0.2f%%\n\n" % ((fail_count / (pass_count + fail_count)) * 100))
+print("Total records: %d" % (p + n))
+print("Positive records: %d" % p)
+print("Negative records: %d" % n)
+print("True Positive records: %d" % tp)
+print("True Negative records: %d" % tn)
+print("False Positive records: %d" % fp)
+print("False Negative records: %d" % fn)
+print("Properly identified records: %d" % (tp +  tn))
+print("Improperly identified records: %d" % (fp + fn))
+print("Error Rate: %0.2f%%" % (((fp + fn) / (p + n)) * 100))
+print("Accuracy: %0.2f%%" % (((tp + tn) / (p + n)) * 100))
+print("Sensitivity: %0.2f%%" % ((tp / p) * 100))
+print("Specificity: %0.2f%%" % ((tn / n) * 100))
+print("Precision: %0.2f%%\n\n" % ((tp / (tp + tn)) * 100))
 
 df = pd.read_csv('bupa.data.csv', sep=',', header=0)
 
@@ -333,16 +384,41 @@ print("Fitting bupa dataset with 0.9 threshold, this could take a minute or two.
 t2.fit()
 
 print("Classifying bupa test data: ")
-pass_count = 0
-fail_count = 0
+p = 0
+n = 0
+tp = 0
+tn = 0
+fp = 0
+fn = 0
 for i in range(df.shape[0]):
     result = t2.classify(df.iloc[i])
 
-    if df.iloc[i][-1] == result:
-        pass_count += 1
+    if result == "<=50K":
+        if df.iloc[i][-1] == result:
+            n += 1
+            tn += 1
+        else:
+            p += 1
+            fn += 1
     else:
-        fail_count += 1
+        if df.iloc[i][-1] == result:
+            p += 1
+            tp += 1
+        else:
+            n += 1
+            fp += 1
 
-print("Properly identified records: %d" % pass_count)
-print("Improperly identified records: %d" % fail_count)
-print("Error Rate: %0.2f%%\n\n" % ((fail_count / (pass_count + fail_count)) * 100))
+print("Total records: %d" % (p + n))
+print("Positive records: %d" % p)
+print("Negative records: %d" % n)
+print("True Positive records: %d" % tp)
+print("True Negative records: %d" % tn)
+print("False Positive records: %d" % fp)
+print("False Negative records: %d" % fn)
+print("Properly identified records: %d" % (tp +  tn))
+print("Improperly identified records: %d" % (fp + fn))
+print("Error Rate: %0.2f%%" % (((fp + fn) / (p + n)) * 100))
+print("Accuracy: %0.2f%%" % (((tp + tn) / (p + n)) * 100))
+print("Sensitivity: %0.2f%%" % ((tp / p) * 100))
+print("Specificity: %0.2f%%" % ((tn / n) * 100))
+print("Precision: %0.2f%%\n\n" % ((tp / (tp + tn)) * 100))
