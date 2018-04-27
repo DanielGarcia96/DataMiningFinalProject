@@ -742,8 +742,24 @@ if __name__ == '__main__':
                      "Marital_Status", "Occupation", "Relationship", "Race", "Sex",
                      "Capital_Gain", "Capital_Loss", "Hours_Per_Week", "Native_Country", "Amount"]
 
+    '''
+    # CHANGE THIS HERE, dataSelection, to run small or short (medium) size dataset
+    #   1 = small is 1000 entries or rows
+    #   2 = short is 5000 entries or rows
+    '''
+    #-------------------------------------------------------------------------
+    
+    dataSelection = 2
+    #dataSelection = 2
+
+    #-------------------------------------------------------------------------
+
     # load Sample data to dataframe
-    sample_data = pd.read_csv('adult_small.data', sep= ', ', header= None, engine= 'python')
+    if dataSelection == 1:
+        sample_data = pd.read_csv('adult_small.data', sep= ', ', header= None, engine= 'python')
+    elif dataSelection == 2:
+        sample_data = pd.read_csv('adult_short.data', sep= ', ', header= None, engine= 'python')
+    
     sample_data.columns = attributeList
     # Split the data into training/test with a
     training_data, test_data = train_test_split(sample_data, test_size=0.2)

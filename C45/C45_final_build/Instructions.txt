@@ -1,0 +1,7 @@
+Source code provided and wrote in Python using Spyder IDE.
+No need to input anything, just load file and run.
+Default selection is using the "small" dataset which provides 1000 entries,
+a file called "adult_short" is also provided which uses 5000 entries.
+
+To choose which dataset to run, you must modify the source code and change the
+value dataSelection to your desired sample size.
