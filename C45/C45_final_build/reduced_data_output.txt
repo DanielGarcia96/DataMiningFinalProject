@@ -1,0 +1,237 @@
+Python 3.6.3 |Anaconda custom (64-bit)| (default, Oct 15 2017, 03:27:45) [MSC v.1900 64 bit (AMD64)]
+Type "copyright", "credits" or "license" for more information.
+
+IPython 6.1.0 -- An enhanced Interactive Python.
+
+In [1]: runfile('D:/User/Dropbox/School/Spring_2018/Intro_Data_Mining/grp_proj/C45_classifier.py', wdir='D:/User/Dropbox/School/Spring_2018/Intro_Data_Mining/grp_proj')
+C:\Users\Kyle\Anaconda3\lib\site-packages\sklearn\cross_validation.py:41: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. Also note that the interface of the new CV iterators are different from that of this module. This module will be removed in 0.20.
+  "This module will be removed in 0.20.", DeprecationWarning)
+
+Start alg...
+Size of Training Data = 8000 Size of Testing Data = 2000
+
+Building Tree/Fit Data
+    | 8000 | Attributes Available = 14
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Capital_Gain
+          Getting Splitting criterion
+            Split Point = 7073
+              Parition Data on Splitting Attribute
+                LENGTH L = 7655 R = 345
+  Recursing
+    | 7655 | Attributes Available = 13
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Capital_Loss
+          Getting Splitting criterion
+            Split Point = 1846
+              Parition Data on Splitting Attribute
+                LENGTH L = 7420 R = 235
+  Recursing
+    | 7420 | Attributes Available = 12
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Marital_Status
+          Getting Splitting Subset
+            Spliting Subset = ['Married-civ-spouse']
+              Parition Data on Splitting Attribute
+                LENGTH L = 4205 R = 3215
+  Recursing
+    | 4205 | Attributes Available = 11
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = fnlwgt
+          Getting Splitting criterion
+            Split Point = 183499
+              Parition Data on Splitting Attribute
+                LENGTH L = 2149 R = 2056
+  Recursing
+    | 2149 | Attributes Available = 10
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Education
+          Getting Splitting Subset
+            Spliting Subset = ['Assoc-acdm', '9th', '5th-6th', '10th', 'Assoc-voc', '12th', 'Some-college', '11th', 'HS-grad', '7th-8th', '1st-4th']
+              Parition Data on Splitting Attribute
+                LENGTH L = 434 R = 1715
+  Recursing
+    | 434 | Attributes Available = 9
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Native_Country
+          Getting Splitting Subset
+            Spliting Subset = ['India', 'Italy', 'Jamaica']
+              Parition Data on Splitting Attribute
+                LENGTH L = 429 R = 5
+  Recursing
+    | 429 | Attributes Available = 8
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Age
+          Getting Splitting criterion
+            Split Point = 28
+              Parition Data on Splitting Attribute
+                LENGTH L = 129 R = 300
+  Recursing
+    | 129 | Attributes Available = 7
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Education_Num
+          Getting Splitting criterion
+            Split Point = 14
+              Parition Data on Splitting Attribute
+                LENGTH L = 126 R = 3
+  Recursing
+    | 126 | Attributes Available = 6
+                  PURE DATA
+  Recursing
+    | 3 | Attributes Available = 6
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Hours_Per_Week
+          Getting Splitting criterion
+            Split Point = 67
+              Parition Data on Splitting Attribute
+                LENGTH L = 2 R = 1
+  Recursing
+    | 2 | Attributes Available = 5
+                  PURE DATA
+  Recursing
+    | 1 | Attributes Available = 5
+                  PURE DATA
+  Recursing
+    | 300 | Attributes Available = 5
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Occupation
+          Getting Splitting Subset
+            Spliting Subset = ['Transport-moving', 'Machine-op-inspct', 'Farming-fishing', 'Adm-clerical', 'Handlers-cleaners', 'Other-service']
+              Parition Data on Splitting Attribute
+                LENGTH L = 254 R = 46
+  Recursing
+    | 254 | Attributes Available = 4
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Workclass
+          Getting Splitting Subset
+            Spliting Subset = ['Local-gov', 'State-gov', '?']
+              Parition Data on Splitting Attribute
+                LENGTH L = 180 R = 74
+  Recursing
+    | 180 | Attributes Available = 3
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Race
+          Getting Splitting Subset
+            Spliting Subset = ['White']
+              Parition Data on Splitting Attribute
+                LENGTH L = 23 R = 157
+  Recursing
+    | 23 | Attributes Available = 2
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Relationship
+          Getting Splitting Subset
+            Spliting Subset = ['Not-in-family']
+              Parition Data on Splitting Attribute
+                LENGTH L = 11 R = 12
+  Recursing
+    | 11 | Attributes Available = 1
+                  PURE DATA
+  Recursing
+    | 12 | Attributes Available = 1
+      Selecting Attribute with highest Gain Ratio
+        Splitting Attribute = Sex
+          Getting Splitting Subset
+            Spliting Subset = ['Female']
+              Parition Data on Splitting Attribute
+                LENGTH L = 5 R = 7
+  Recursing
+    | 5 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 7 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 157 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 74 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 46 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 5 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 1715 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 2056 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 3215 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 235 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+  Recursing
+    | 345 | Attributes Available = 0
+                  No More Attributes, Return Majority Class
+------------------------------------------------------------------
+Finished Fitting Data
+Is Capital_Gain > 7073?
+--> False:
+  Is Capital_Loss > 1846?
+  --> False:
+    Is Marital_Status == ['Married-civ-spouse']?
+    --> False:
+      Is fnlwgt > 183499?
+      --> False:
+        Is Education == ['Assoc-acdm', '9th', '5th-6th', '10th', 'Assoc-voc', '12th', 'Some-college', '11th', 'HS-grad', '7th-8th', '1st-4th']?
+        --> False:
+          Is Native_Country == ['India', 'Italy', 'Jamaica']?
+          --> False:
+            Is Age > 28?
+            --> False:
+              Is Education_Num > 14?
+              --> False:
+                Predict <=50K
+              --> True:
+                Is Hours_Per_Week > 67?
+                --> False:
+                  Predict >50K
+                --> True:
+                  Predict <=50K
+            --> True:
+              Is Occupation == ['Transport-moving', 'Machine-op-inspct', 'Farming-fishing', 'Adm-clerical', 'Handlers-cleaners', 'Other-service']?
+              --> False:
+                Is Workclass == ['Local-gov', 'State-gov', '?']?
+                --> False:
+                  Is Race == ['White']?
+                  --> False:
+                    Is Relationship == ['Not-in-family']?
+                    --> False:
+                      Predict <=50K
+                    --> True:
+                      Is Sex == ['Female']?
+                      --> False:
+                        Predict <=50K
+                      --> True:
+                        Predict <=50K
+                  --> True:
+                    Predict <=50K
+                --> True:
+                  Predict <=50K
+              --> True:
+                Predict <=50K
+          --> True:
+            Predict >50K
+        --> True:
+          Predict <=50K
+      --> True:
+        Predict <=50K
+    --> True:
+      Predict <=50K
+  --> True:
+    Predict >50K
+--> True:
+  Predict >50K
+
+Classify
+[489, 1511]
+
+TP = 123 TN = 1493 FP = 18 FN = 366
+error rate = 0.192 accuracy = 0.808 TPR = 0.25153374233128833 TNR = 0.9880873593646592 Precision = 0.8723404255319149
+15667.11543950962 second to complete
+
+In [2]: 
